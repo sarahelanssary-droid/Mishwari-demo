@@ -1,0 +1,2971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mishwari — Mobility & Transportation Egypt | INSY 714 Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700;9..144,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Cairo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg-warm: #F2EBDD;
+    --bg-warm-2: #ECE2CD;
+    --bg-card: #FFFFFF;
+    --ink: #15202B;
+    --ink-soft: #4A5A6A;
+    --ink-faint: #8A95A3;
+    --line: #E5DCC9;
+    --nile: #0E4C5C;
+    --nile-deep: #073642;
+    --nile-soft: #DCEAEE;
+    --gold: #C8923C;
+    --gold-soft: #F3E4C4;
+    --red: #B23A2E;
+    --green: #2D7D55;
+    --line-1: #B23A2E;
+    --line-2: #C8923C;
+    --line-3: #2D7D55;
+    --line-4: #8E44AD; /* Monorail East — purple */
+    --line-5: #00838F; /* Monorail West — teal */
+    --line-6: #5D4037; /* ENR National Railways — brown */
+  }
+  * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+  html, body { 
+    margin: 0; padding: 0; 
+    height: 100%;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg-warm);
+    color: var(--ink);
+    overflow: hidden;
+  }
+  body {
+    background: 
+      radial-gradient(circle at 15% 20%, rgba(200,146,60,0.08) 0%, transparent 40%),
+      radial-gradient(circle at 85% 80%, rgba(14,76,92,0.07) 0%, transparent 45%),
+      var(--bg-warm);
+  }
+  .font-display { font-family: 'Fraunces', serif; font-variation-settings: "opsz" 100; }
+  .font-arabic { font-family: 'Cairo', sans-serif; }
+  .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Phone frame */
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #0A0A0A;
+    border-radius: 54px;
+    padding: 14px;
+    box-shadow: 
+      0 50px 100px -20px rgba(7, 54, 66, 0.35),
+      0 30px 60px -30px rgba(0,0,0,0.4),
+      inset 0 0 0 2px #1a1a1a;
+    position: relative;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    background: var(--bg-warm);
+    border-radius: 42px;
+    overflow: hidden;
+    position: relative;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 22px; left: 50%;
+    transform: translateX(-50%);
+    width: 110px; height: 32px;
+    background: #0A0A0A;
+    border-radius: 20px;
+    z-index: 50;
+  }
+
+  /* Screen container */
+  .screen {
+    position: absolute; inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    transition: opacity 0.35s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.entering { opacity: 0; transform: translateX(30px); }
+  .screen.exiting { opacity: 0; transform: translateX(-30px); }
+
+  /* Status bar */
+  .status-bar {
+    height: 50px;
+    padding: 16px 32px 8px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600; font-size: 14px;
+    color: var(--ink);
+    position: relative; z-index: 40;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--bg-card);
+    border-radius: 22px;
+    border: 1px solid var(--line);
+  }
+  .card-warm {
+    background: linear-gradient(135deg, #FFFFFF 0%, #FBF6EA 100%);
+    border-radius: 22px;
+    border: 1px solid var(--line);
+  }
+
+  /* Tap targets */
+  .tap { transition: transform 0.15s ease, background 0.15s ease; cursor: pointer; user-select: none; }
+  .tap:active { transform: scale(0.97); }
+
+  /* Bottom nav */
+  .bottom-nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--line);
+    padding: 12px 24px 28px;
+    display: flex; justify-content: space-around;
+    z-index: 30;
+  }
+  .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 12px; cursor: pointer; }
+  .nav-item .nav-icon { width: 26px; height: 26px; color: var(--ink-faint); transition: color 0.2s; }
+  .nav-item .nav-label { font-size: 10px; font-weight: 600; color: var(--ink-faint); transition: color 0.2s; letter-spacing: 0.02em; }
+  .nav-item.active .nav-icon, .nav-item.active .nav-label { color: var(--nile); }
+
+  /* Pulsing dot for "live" */
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+  /* QR code grow-in */
+  @keyframes qr-reveal {
+    0% { opacity: 0; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .qr-reveal { animation: qr-reveal 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .shimmer-text {
+    background: linear-gradient(90deg, var(--ink) 0%, var(--gold) 50%, var(--ink) 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 3s linear infinite;
+  }
+
+  /* Page-load stagger */
+  @keyframes rise-in {
+    0% { opacity: 0; transform: translateY(14px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .rise { animation: rise-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .rise-d1 { animation-delay: 0.05s; }
+  .rise-d2 { animation-delay: 0.1s; }
+  .rise-d3 { animation-delay: 0.15s; }
+  .rise-d4 { animation-delay: 0.2s; }
+  .rise-d5 { animation-delay: 0.25s; }
+  .rise-d6 { animation-delay: 0.3s; }
+
+  /* Decorative ticket perforation */
+  .ticket-edge {
+    background-image: radial-gradient(circle at 0 50%, transparent 6px, var(--bg-card) 6.5px);
+    background-image: 
+      radial-gradient(circle at 0 0, transparent 8px, transparent 8.5px),
+      linear-gradient(to right, var(--line) 50%, transparent 0%);
+    background-position: 0 0, 0 50%;
+    background-size: 100% 100%, 12px 1px;
+    background-repeat: no-repeat, repeat-x;
+  }
+
+  /* Outer page chrome */
+  .demo-header {
+    padding: 32px 48px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .demo-stage {
+    display: flex; justify-content: center; align-items: center;
+    height: 100vh;
+    padding: 20px;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  /* Scale the phone down on shorter viewports so it always fits */
+  @media (max-height: 940px) {
+    .phone-frame { transform: scale(0.92); transform-origin: center; }
+  }
+  @media (max-height: 880px) {
+    .phone-frame { transform: scale(0.85); }
+  }
+  @media (max-height: 820px) {
+    .phone-frame { transform: scale(0.78); }
+  }
+  @media (max-height: 760px) {
+    .phone-frame { transform: scale(0.72); }
+  }
+  @media (max-height: 700px) {
+    .phone-frame { transform: scale(0.66); }
+  }
+  @media (max-height: 640px) {
+    .phone-frame { transform: scale(0.6); }
+  }
+
+  /* ===== MOBILE PHONE LAYOUT — fill entire screen, hide fake bezels ===== */
+  /* Detect actual phones: narrow viewport. The fake phone frame becomes a real fullscreen app. */
+  @media (max-width: 500px) {
+    body { background: var(--bg-warm); overflow: hidden; }
+    .demo-stage { padding: 0 !important; height: 100vh; height: 100dvh; }
+    .phone-frame {
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      transform: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+    .phone-screen {
+      border-radius: 0 !important;
+    }
+    .phone-notch { display: none !important; }
+  }
+
+  /* Selection halos */
+  .route-card.selected { 
+    border: 2px solid var(--nile);
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--nile-soft) 100%);
+  }
+
+  /* RTL handling */
+  [dir="rtl"] { text-align: right; }
+
+  /* Map sketch background for route */
+  .map-bg {
+    background-color: #EBE3D2;
+    background-image: 
+      linear-gradient(rgba(14,76,92,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(14,76,92,0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  /* Custom checkbox-ish radio */
+  .radio { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .radio.selected { border-color: var(--nile); }
+  .radio.selected::after { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--nile); }
+
+  /* Modal / sheet */
+  .modal-overlay {
+    position: absolute; inset: 0;
+    background: rgba(7, 54, 66, 0.45);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex; align-items: flex-end;
+    animation: overlay-fade 0.2s ease;
+  }
+  @keyframes overlay-fade { from { opacity: 0; } to { opacity: 1; } }
+  .modal-sheet {
+    background: var(--bg-warm);
+    width: 100%;
+    border-radius: 28px 28px 0 0;
+    padding: 18px 22px 28px;
+    max-height: 78%;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    animation: sheet-up 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 -10px 30px rgba(7, 54, 66, 0.15);
+  }
+  .modal-sheet::-webkit-scrollbar { display: none; }
+  @keyframes sheet-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-grabber { width: 36px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 14px; }
+
+  /* Moving train on metro map */
+  @keyframes train-move-1 {
+    0% { offset-distance: 0%; }
+    100% { offset-distance: 100%; }
+  }
+
+  /* Live blinking dot */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .blink { animation: blink 1.2s ease-in-out infinite; }
+
+  /* Toast */
+  .toast {
+    position: absolute; left: 16px; right: 16px;
+    top: 70px;
+    z-index: 90;
+    background: var(--ink);
+    color: var(--bg-warm);
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 13px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ====== Phone home screen (iOS-style) ====== */
+  .homescreen-bg {
+    position: absolute; inset: 0;
+    background: 
+      radial-gradient(ellipse at 50% -10%, rgba(110, 70, 200, 0.32) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 110%, rgba(200, 100, 75, 0.25) 0%, transparent 50%),
+      linear-gradient(180deg, 
+        #1F1A4A 0%,
+        #1A1F50 22%,
+        #16224E 45%,
+        #161E3F 70%,
+        #121A30 100%
+      );
+  }
+  .homescreen-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: 
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.025) 0%, transparent 30%);
+    pointer-events: none;
+  }
+
+  /* iOS 18 dark-mode style app icons */
+  .app-icon {
+    width: 58px; height: 58px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    box-shadow: 
+      0 2px 4px rgba(0, 0, 0, 0.4),
+      0 6px 16px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+  }
+  .app-icon::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 14px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 35%);
+  }
+  .app-tile {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    user-select: none;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    padding: 0;
+    position: relative;
+  }
+  .app-tile .icon-wrap {
+    position: relative;
+  }
+  .app-label {
+    font-size: 11px;
+    color: white;
+    font-weight: 500;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* iOS notification badge */
+  .notif-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    min-width: 19px;
+    height: 19px;
+    background: #FF3B30;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 0 5px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    line-height: 1;
+    font-family: 'DM Sans', sans-serif;
+    z-index: 2;
+  }
+
+  /* iOS-style Mishwari widget (2x2 in home grid) — keeps brand color for "expressive" feel */
+  .widget-mishwari {
+    grid-column: span 2;
+    grid-row: span 2;
+    background: linear-gradient(135deg, #073642 0%, #0E4C5C 45%, #C8923C 110%);
+    border-radius: 22px;
+    padding: 14px 14px 12px;
+    color: white;
+    box-shadow: 
+      0 2px 6px rgba(0, 0, 0, 0.28),
+      0 8px 22px rgba(0, 0, 0, 0.22);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .widget-mishwari::before {
+    content: '';
+    position: absolute;
+    top: -40%; right: -30%;
+    width: 90%; height: 90%;
+    background: radial-gradient(circle, rgba(255, 215, 145, 0.35) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .widget-mishwari::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 22px;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 30%);
+  }
+
+  /* iOS search pill above the dock */
+  .search-pill {
+    margin: 14px auto 0;
+    background: rgba(255, 255, 255, 0.12);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    backdrop-filter: blur(24px) saturate(160%);
+    border-radius: 999px;
+    padding: 7px 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+    cursor: pointer;
+  }
+
+  /* Liquid-glass dock — darker for iOS 18 dark mode */
+  .app-dock {
+    margin: 8px 12px 0;
+    background: rgba(255, 255, 255, 0.12);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    backdrop-filter: blur(40px) saturate(180%);
+    border-radius: 30px;
+    padding: 12px 6px 9px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+
+  /* Home pill (iOS home indicator — clickable to return to home screen) */
+  .home-pill {
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 144px;
+    height: 22px;
+    background: transparent;
+    border: none;
+    padding: 9px 22px;
+    z-index: 31;
+    cursor: pointer;
+  }
+  .home-pill::after {
+    content: '';
+    display: block;
+    width: 100%; height: 4px;
+    border-radius: 2px;
+    background: var(--ink);
+    opacity: 0.55;
+  }
+  .home-pill.light::after {
+    background: white;
+    opacity: 0.7;
+  }
+
+  /* Splash screen */
+  .splash-bg {
+    position: absolute; inset: 0;
+    background: 
+      radial-gradient(circle at 30% 20%, rgba(200, 146, 60, 0.35) 0%, transparent 50%),
+      linear-gradient(135deg, var(--nile-deep) 0%, var(--nile) 55%, var(--gold) 100%);
+  }
+  @keyframes splash-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+  }
+  .splash-logo { animation: splash-pulse 1.6s ease-in-out infinite; }
+  @keyframes splash-fade-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .splash-text { animation: splash-fade-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+</style>
+</head>
+<body>
+
+<div class="demo-stage">
+  <div class="phone-frame">
+    <div class="phone-notch"></div>
+    <div class="phone-screen" id="screen-root">
+      <!-- screens injected by JS -->
+    </div>
+  </div>
+</div>
+
+<script>
+// ============== STATE ==============
+const state = {
+  screen: 'homescreen',    // homescreen | splash | home | plan | results | payment | ticket | profile | network
+  lastAppScreen: null,     // remembers where you were before returning to phone home
+  lang: 'en',              // en | ar
+  selectedRoute: 1,        // 0 | 1 | 2
+  paymentMethod: 'paymob', // paymob | applepay | wallet
+  preference: 'fastest',   // fastest | cheapest | leastWalk
+  modal: null,             // null | 'notifications' | 'timepicker' | 'locationpicker'
+  locationField: null,     // 'from' | 'to'
+  searchQuery: '',         // location picker search query
+  departureTime: 'now',    // 'now' | '+15' | '+30' | '+60' | '+120'
+  toast: null,             // { text, expires }
+  routes: null,            // current computed routes (array)
+  routesKey: null,         // cache key (from->to) to invalidate
+  trip: {
+    from: 'Fifth Settlement',
+    fromAr: 'التجمع الخامس',
+    to: 'Dokki',
+    toAr: 'الدقي',
+  },
+  user: { name: 'Sarah', nameAr: 'سارة', stat: { trips: 47, saved: 1240 } },
+};
+
+// ============== LIVE DATA (real-time simulation) ==============
+const liveData = {
+  now: new Date(),
+  // Next train arrivals by station — count down each second
+  nextTrains: {
+    'One Ninety':        { line: 4, mins: 3, secs: 42 }, // Cairo Monorail East — nearest station to Fifth Settlement
+    'Musheer Tantawi':   { line: 4, mins: 6, secs: 15 },
+    'Lotus':             { line: 4, mins: 7, secs: 18 },
+    'Business District': { line: 4, mins: 11, secs: 5 },
+    'Justice City':      { line: 4, mins: 15, secs: 22 },
+    'Maadi':   { line: 1, mins: 2, secs: 45 },
+    'Dokki':   { line: 2, mins: 1, secs: 20 },
+    'Sadat':   { line: 1, mins: 4, secs: 10 },
+    'Nasser':  { line: 3, mins: 3, secs: 30 },
+    'Attaba':  { line: 2, mins: 0, secs: 55 },
+    'Helwan':  { line: 1, mins: 5, secs: 0  },
+  },
+  // Next bus arrivals (used by the home widget for non-metro areas like New Cairo)
+  nextBuses: {
+    'Tagamoa': { line: '951', mins: 4, secs: 12, destEn: 'Tahrir', destAr: 'التحرير' },
+  },
+  alerts: [
+    { id: 1, severity: 'warning', icon: 'bell', lineColor: 'var(--line-2)',
+      title: { en: 'Line 2 · Minor delay', ar: 'تأخير بسيط على الخط 2' },
+      body: { en: 'Trains running ~3 min behind schedule between Sadat and Dokki.', ar: 'القطارات متأخرة 3 دقائق بين السادات والدقي.' },
+      time: { en: '2 min ago', ar: 'قبل دقيقتين' } },
+    { id: 2, severity: 'info', icon: 'bolt', lineColor: 'var(--nile)',
+      title: { en: 'Off-peak discount active', ar: 'خصم خارج ساعات الذروة' },
+      body: { en: '15% off all rides before 7 AM and after 9 PM today.', ar: '15٪ خصم على جميع الرحلات قبل 7 صباحاً وبعد 9 مساءً اليوم.' },
+      time: { en: '38 min ago', ar: 'قبل 38 دقيقة' } },
+    { id: 3, severity: 'success', icon: 'check', lineColor: 'var(--green)',
+      title: { en: 'Service restored on Line 3', ar: 'استعادة الخدمة على الخط 3' },
+      body: { en: 'All Line 3 stations now operational after maintenance.', ar: 'جميع محطات الخط 3 تعمل بانتظام بعد الصيانة.' },
+      time: { en: '3 hr ago', ar: 'قبل 3 ساعات' } },
+  ],
+};
+
+function formatTime(d) {
+  const h = d.getHours();
+  const m = d.getMinutes();
+  return `${h}:${String(m).padStart(2,'0')}`;
+}
+function addMin(d, m) {
+  return new Date(d.getTime() + m * 60000);
+}
+function departureLabel() {
+  const map = { 'now': 0, '+15': 15, '+30': 30, '+60': 60, '+120': 120 };
+  const mins = map[state.departureTime] || 0;
+  const target = addMin(liveData.now, mins);
+  if (mins === 0) return state.lang==='ar' ? `الآن · ${formatTime(target)}` : `Leaving now · ${formatTime(target)}`;
+  return state.lang==='ar' ? `بعد ${mins} د · ${formatTime(target)}` : `In ${mins} min · ${formatTime(target)}`;
+}
+
+// Tick every second
+function liveTick() {
+  liveData.now = new Date();
+  // Decrement train counters
+  Object.values(liveData.nextTrains).forEach(t => {
+    t.secs--;
+    if (t.secs < 0) { t.mins--; t.secs = 59; }
+    if (t.mins < 0) {
+      t.mins = Math.floor(Math.random() * 5) + 2;
+      t.secs = Math.floor(Math.random() * 60);
+    }
+  });
+  // Decrement bus counters
+  Object.values(liveData.nextBuses).forEach(t => {
+    t.secs--;
+    if (t.secs < 0) { t.mins--; t.secs = 59; }
+    if (t.mins < 0) {
+      t.mins = Math.floor(Math.random() * 7) + 4;
+      t.secs = Math.floor(Math.random() * 60);
+    }
+  });
+  updateLiveDom();
+}
+
+function updateLiveDom() {
+  // Status bar clock
+  document.querySelectorAll('[data-live="clock"]').forEach(el => {
+    el.textContent = formatTime(liveData.now);
+  });
+  // Big clock on phone home screen
+  document.querySelectorAll('[data-live="bigclock"]').forEach(el => {
+    el.textContent = formatTime(liveData.now);
+  });
+  // Next-train counters per station
+  document.querySelectorAll('[data-live-station]').forEach(el => {
+    const t = liveData.nextTrains[el.dataset.liveStation];
+    if (t) el.textContent = `${t.mins}:${String(t.secs).padStart(2,'0')}`;
+  });
+  // Next-bus counters per stop
+  document.querySelectorAll('[data-live-bus]').forEach(el => {
+    const t = liveData.nextBuses[el.dataset.liveBus];
+    if (t) el.textContent = `${t.mins}:${String(t.secs).padStart(2,'0')}`;
+  });
+}
+setInterval(liveTick, 1000);
+
+// ============== TRANSLATIONS ==============
+const t = {
+  en: {
+    greet: 'Good morning',
+    where: 'Where to today?',
+    quickPlaces: 'Quick destinations',
+    home: 'Home', work: 'Work', university: 'University', airport: 'Airport',
+    liveStatus: 'Live network status', viewMap: 'View map',
+    line1: 'Line 1 · Helwan ↔ El-Marg',
+    line2: 'Line 2 · Shubra ↔ El-Mounib',
+    line3: 'Line 3 · Adly Mansour ↔ Kit Kat',
+    line4: 'Monorail East · Musheer ↔ Justice City',
+    line5: 'Monorail West · 6th October ↔ Wadi El-Nile',
+    enrLine: 'National Trains · Cairo ↔ intercity',
+    operational: 'Operational', minorDelay: 'Minor delay',
+    partialService: 'Partial service', underConstruction: 'Under construction',
+    recentTrips: 'Recent trips',
+    tabs: { home: 'Home', tickets: 'Tickets', map: 'Network', profile: 'Profile' },
+    planTrip: 'Plan a trip', from: 'From', to: 'To',
+    leaveNow: 'Leaving now', changeTime: 'Change time',
+    prefs: 'Preferences', fastest: 'Fastest', cheapest: 'Cheapest', leastWalk: 'Least walking',
+    search: 'Search routes',
+    routes: 'Routes', sortedBy: 'Sorted by fastest',
+    minutes: 'min', mins: 'mins', egp: 'EGP',
+    walk: 'Walk', metro: 'Metro', bus: 'Bus', train: 'Train', monorail: 'Monorail',
+    continue: 'Continue to payment',
+    paymentTitle: 'Confirm & pay',
+    summary: 'Trip summary',
+    payWith: 'Pay with', applePay: 'Apple Pay', wallet: 'Mishwari Wallet', paymob: 'Paymob',
+    paySecure: 'Pay securely',
+    totalLabel: 'Total',
+    ticketActive: 'Active ticket',
+    validFor: 'Valid for',
+    encrypted: 'AES-256 encrypted · Scan at gate',
+    showProof: 'Show this QR at the metro gate or to the bus driver',
+    profile: 'Profile',
+    yourImpact: 'Your impact',
+    trips: 'Trips taken', savedVs: 'Saved vs ride-share',
+    language: 'Language', english: 'English', arabic: 'العربية',
+    paid: 'Operated by the Ministry of Transportation',
+    selectRoute: 'Select route',
+  },
+  ar: {
+    greet: 'صباح الخير',
+    where: 'إلى أين اليوم؟',
+    quickPlaces: 'وجهات سريعة',
+    home: 'المنزل', work: 'العمل', university: 'الجامعة', airport: 'المطار',
+    liveStatus: 'حالة الشبكة المباشرة', viewMap: 'عرض الخريطة',
+    line1: 'الخط 1 · حلوان ↔ المرج',
+    line2: 'الخط 2 · شبرا ↔ المنيب',
+    line3: 'الخط 3 · عدلي منصور ↔ كيت كات',
+    line4: 'مونوريل الشرق · المشير ↔ مدينة العدالة',
+    line5: 'مونوريل الغرب · أكتوبر ↔ وادي النيل',
+    enrLine: 'القطارات الوطنية · القاهرة ↔ المحافظات',
+    operational: 'يعمل بانتظام', minorDelay: 'تأخير بسيط',
+    partialService: 'خدمة جزئية', underConstruction: 'قيد الإنشاء',
+    recentTrips: 'رحلات سابقة',
+    tabs: { home: 'الرئيسية', tickets: 'تذاكري', map: 'الشبكة', profile: 'حسابي' },
+    planTrip: 'خطّط رحلتك', from: 'من', to: 'إلى',
+    leaveNow: 'الانطلاق الآن', changeTime: 'تغيير الوقت',
+    prefs: 'التفضيلات', fastest: 'الأسرع', cheapest: 'الأرخص', leastWalk: 'أقل مشي',
+    search: 'بحث عن مسارات',
+    routes: 'المسارات', sortedBy: 'مرتبة حسب الأسرع',
+    minutes: 'د', mins: 'د', egp: 'جنيه',
+    walk: 'مشي', metro: 'مترو', bus: 'أتوبيس', train: 'قطار', monorail: 'مونوريل',
+    continue: 'متابعة الدفع',
+    paymentTitle: 'تأكيد والدفع',
+    summary: 'ملخص الرحلة',
+    payWith: 'ادفع باستخدام', applePay: 'Apple Pay', wallet: 'محفظة مشواري', paymob: 'Paymob',
+    paySecure: 'ادفع بأمان',
+    totalLabel: 'الإجمالي',
+    ticketActive: 'تذكرة نشطة',
+    validFor: 'صالحة لمدة',
+    encrypted: 'مشفّر بـ AES-256 · امسح عند البوابة',
+    showProof: 'اعرض رمز QR على بوابة المترو أو لسائق الأتوبيس',
+    profile: 'الحساب',
+    yourImpact: 'أثرك',
+    trips: 'الرحلات', savedVs: 'مدخراتك مقابل سيارات الأجرة',
+    language: 'اللغة', english: 'English', arabic: 'العربية',
+    paid: 'تشغيل وزارة النقل المصرية',
+    selectRoute: 'اختر مساراً',
+  }
+};
+
+// ============== ROUTING ENGINE ==============
+// Cairo transit graph: metro stations with line + position, plus special destinations.
+const stationData = {
+  // Line 1 (Red)
+  'Helwan':       { ar: 'حلوان',           lines: [1], pos: { 1: 0 } },
+  'Maadi':        { ar: 'المعادي',         lines: [1], pos: { 1: 5 } },
+  'Sadat':        { ar: 'السادات',         lines: [1, 2], pos: { 1: 10, 2: 9 }, interchange: true },
+  'Nasser':       { ar: 'جمال عبد الناصر', lines: [1, 3], pos: { 1: 11, 3: 7 }, interchange: true },
+  'Abbassia':     { ar: 'العباسية',        lines: [3], pos: { 3: 5 } },
+  'El-Marg':      { ar: 'المرج',           lines: [1], pos: { 1: 30 } },
+  // Line 2 (Yellow)
+  'Shubra':       { ar: 'شبرا',            lines: [2], pos: { 2: 0 } },
+  'Attaba':       { ar: 'العتبة',          lines: [2, 3], pos: { 2: 7, 3: 9 }, interchange: true },
+  'Dokki':        { ar: 'الدقي',           lines: [2], pos: { 2: 12 } },
+  'Mohandessin':  { ar: 'المهندسين',       lines: [2], pos: { 2: 13 } }, // approximate; in reality nearby
+  'El-Mounib':    { ar: 'المنيب',          lines: [2], pos: { 2: 20 } },
+  // Line 3 (Green)
+  'Adly Mansour': { ar: 'عدلي منصور',      lines: [3], pos: { 3: 0 } },
+  'Stadium':      { ar: 'استاد القاهرة',   lines: [3], pos: { 3: 3 } }, // Line 4 interchange opens June 2026
+  'Kit Kat':      { ar: 'كيت كات',         lines: [3], pos: { 3: 17 } },
+
+  // Line 4 (Purple) — Cairo Monorail East: operational section Musheer Tantawi ↔ Justice City (16 stations, since May 6, 2026)
+  'Musheer Tantawi':    { ar: 'المشير طنطاوي',       lines: [4], pos: { 4: 0 } },
+  'One Ninety':         { ar: 'وان ناينتي',          lines: [4], pos: { 4: 1 } },
+  'Air Hospital':       { ar: 'مستشفى القوات الجوية', lines: [4], pos: { 4: 2 } },
+  'Al-Narges':          { ar: 'النرجس',              lines: [4], pos: { 4: 3 } },
+  'Investors':          { ar: 'المستثمرين',          lines: [4], pos: { 4: 4 } },
+  'Lotus':              { ar: 'اللوتس',              lines: [4], pos: { 4: 5 } },
+  'Golden Square':      { ar: 'الميدان الذهبي',       lines: [4], pos: { 4: 6 } },
+  'Beit Al-Watan':      { ar: 'بيت الوطن',           lines: [4], pos: { 4: 7 } },
+  'Al-Fattah Mosque':   { ar: 'مسجد الفتاح العليم',  lines: [4], pos: { 4: 8 } },
+  'R1 District':        { ar: 'حي R1',               lines: [4], pos: { 4: 9 } },
+  'R2 District':        { ar: 'حي R2',               lines: [4], pos: { 4: 10 } },
+  'Business District':  { ar: 'الحي المالي',         lines: [4], pos: { 4: 11 } },
+  'Arts & Culture':     { ar: 'مدينة الفنون',        lines: [4], pos: { 4: 12 } },
+  'Government District':{ ar: 'الحي الحكومي',        lines: [4], pos: { 4: 13 } },
+  'Misr Mosque':        { ar: 'مسجد مصر',            lines: [4], pos: { 4: 14 } },
+  'Justice City':       { ar: 'مدينة العدالة',      lines: [4], pos: { 4: 15 } },
+
+  // Line 5 (Teal) — Monorail West: 6th October ↔ Wadi El-Nile (under construction, projected late 2026)
+  '6th October':   { ar: 'السادس من أكتوبر', lines: [5], pos: { 5: 0 } },
+  'Sheikh Zayed':  { ar: 'الشيخ زايد',       lines: [5], pos: { 5: 5 } },
+  'Mall of Egypt': { ar: 'مول مصر',          lines: [5], pos: { 5: 9 } },
+  'Wadi El-Nile':  { ar: 'وادي النيل',        lines: [5], pos: { 5: 14 } },
+
+  // Aliases (display name maps to actual station)
+  'Tahrir':           { ar: 'التحرير', alias: 'Sadat' },
+  'Fifth Settlement': { ar: 'التجمع الخامس', alias: 'One Ninety' }, // 5-min walk to nearest monorail station
+  // National rail (ENR) intercity destinations — accessed via Ramses near Sadat downtown
+  'Alexandria':   { ar: 'الإسكندرية', special: true, isTrain: true, near: 'Sadat', trainTime: 165, trainLine: 'ENR', trainStops: 0, cost: 95 },
+  'Luxor':        { ar: 'الأقصر',     special: true, isTrain: true, near: 'Sadat', trainTime: 540, trainLine: 'ENR', trainStops: 0, cost: 175 },
+  'Aswan':        { ar: 'أسوان',       special: true, isTrain: true, near: 'Sadat', trainTime: 720, trainLine: 'ENR', trainStops: 0, cost: 220 },
+  // Special destinations (need bus connection from nearest metro/monorail)
+  'Cairo Airport':    { ar: 'مطار القاهرة',     special: true, near: 'Adly Mansour', busTime: 18, busLine: 'AIR', busStops: 10 },
+  'GUC New Cairo':    { ar: 'الجامعة الألمانية', special: true, near: 'One Ninety', busTime: 10, busLine: '178', busStops: 5 },
+};
+
+function getStation(name) {
+  const s = stationData[name];
+  if (!s) return null;
+  if (s.alias) {
+    const target = stationData[s.alias];
+    return { ...target, ar: s.ar, displayName: name };
+  }
+  return { ...s, displayName: name };
+}
+
+// Find all interchange stations that connect any line in linesA with any line in linesB
+function findInterchanges(linesA, linesB) {
+  const result = [];
+  for (const name in stationData) {
+    const s = stationData[name];
+    if (!s.interchange) continue;
+    const hasA = s.lines.some(l => linesA.includes(l));
+    const hasB = s.lines.some(l => linesB.includes(l));
+    if (hasA && hasB) result.push(name);
+  }
+  return result;
+}
+
+// Top-level: generate up to 3 route options for any from/to pair
+function generateRoutes(fromName, toName) {
+  const A = getStation(fromName);
+  const B = getStation(toName);
+  if (!A || !B || fromName === toName) {
+    return [defaultRoute(fromName, toName)];
+  }
+  if (A.special || B.special) {
+    return generateSpecialRoutes(A, B, fromName, toName);
+  }
+  // Both pure metro stations
+  const common = A.lines.filter(l => B.lines.includes(l));
+  if (common.length > 0) {
+    return generateDirectRoutes(A, B, common[0], fromName, toName);
+  }
+  const interchanges = findInterchanges(A.lines, B.lines);
+  if (interchanges.length === 0) {
+    // No direct interchange — try a 2-hop route through a "bridge" line
+    return generateMultiHopRoutes(A, B, fromName, toName);
+  }
+  return generateTransferRoutes(A, B, interchanges, fromName, toName);
+}
+
+// "metro" or "monorail" depending on line number
+function lineMode(line) { return line >= 4 ? 'monorail' : 'metro'; }
+// Real Cairo Monorail fares (announced May 8, 2026): 20/40/55/80 EGP zones
+function monorailFare(stops) { return stops <= 5 ? 20 : stops <= 10 ? 40 : stops <= 15 ? 55 : 80; }
+
+// Routes where A's lines and B's lines share no interchange — find a bridge line
+function generateMultiHopRoutes(A, B, fromName, toName) {
+  const aN = A.displayName, bN = B.displayName;
+  // Try each line as a potential bridge
+  for (const L of [3, 1, 2, 4, 5]) {
+    if (A.lines.includes(L) || B.lines.includes(L)) continue;
+    const ix1 = findInterchanges(A.lines, [L]);
+    const ix2 = findInterchanges([L], B.lines);
+    if (ix1.length === 0 || ix2.length === 0) continue;
+
+    const via1Name = ix1[0], via2Name = ix2[0];
+    const via1 = stationData[via1Name], via2 = stationData[via2Name];
+    const fromLine = A.lines.find(l => via1.lines.includes(l));
+    const toLine = B.lines.find(l => via2.lines.includes(l));
+    const stops1 = Math.max(1, Math.abs(A.pos[fromLine] - via1.pos[fromLine]));
+    const stops2 = Math.max(1, Math.abs(via1.pos[L] - via2.pos[L]));
+    const stops3 = Math.max(1, Math.abs(via2.pos[toLine] - B.pos[toLine]));
+    const min1 = Math.max(3, stops1 * 2);
+    const min2 = Math.max(3, stops2 * 2);
+    const min3 = Math.max(3, stops3 * 2);
+    const m1 = lineMode(fromLine), m2 = lineMode(L), m3 = lineMode(toLine);
+    const lineLabel = m => m === 'monorail' ? 'Monorail' : 'Line';
+    const lineLabelAr = m => m === 'monorail' ? 'مونوريل' : 'الخط';
+
+    return [
+      {
+        id: 0,
+        totalMin: 3 + min1 + 3 + min2 + 3 + min3 + 5,
+        cost: m1 === 'monorail' || m3 === 'monorail' ? 22 : 16,
+        co2: 1.1,
+        label: { en: `Via ${via1Name} & ${via2Name}`, ar: `عبر ${via1.ar} و ${via2.ar}` },
+        segments: [
+          { mode: 'walk',  dur: 3, label: { en: `Walk to ${aN} station`, ar: `سير إلى محطة ${A.ar}` }},
+          { mode: m1, line: fromLine, dur: min1, stops: stops1, label: { en: `${lineLabel(m1)} ${fromLine} → ${via1Name}`, ar: `${lineLabelAr(m1)} ${fromLine} → ${via1.ar}` }},
+          { mode: 'walk', dur: 3, label: { en: `Transfer at ${via1Name}`, ar: `تحويلة عند ${via1.ar}` }},
+          { mode: m2, line: L, dur: min2, stops: stops2, label: { en: `${lineLabel(m2)} ${L} → ${via2Name}`, ar: `${lineLabelAr(m2)} ${L} → ${via2.ar}` }},
+          { mode: 'walk', dur: 3, label: { en: `Transfer at ${via2Name}`, ar: `تحويلة عند ${via2.ar}` }},
+          { mode: m3, line: toLine, dur: min3, stops: stops3, label: { en: `${lineLabel(m3)} ${toLine} → ${bN}`, ar: `${lineLabelAr(m3)} ${toLine} → ${B.ar}` }},
+          { mode: 'walk', dur: 5, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+        ],
+      },
+      // Bus-heavy cheap alternative
+      {
+        id: 1,
+        totalMin: 6 + 45 + 6,
+        cost: 9,
+        co2: 1.6,
+        label: { en: 'Cheapest · Bus + Metro', ar: 'الأرخص · أتوبيس + مترو' },
+        segments: [
+          { mode: 'walk', dur: 6, label: { en: 'Walk to CTA bus stop', ar: 'سير إلى موقف الأتوبيس' }},
+          { mode: 'bus',  line: '951', dur: 45, stops: 22, label: { en: `Bus 951 → ${bN}`, ar: `أتوبيس 951 → ${B.ar}` }},
+          { mode: 'walk', dur: 6, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+        ],
+      },
+    ];
+  }
+  // No bridge available — Monorail East not yet connected to metro (Stadium section opens June 2026)
+  if (A.lines.includes(4) || B.lines.includes(4)) {
+    return generateMonorailFallback(A, B, fromName, toName);
+  }
+  return [defaultRoute(fromName, toName)];
+}
+
+// Until Stadium section opens (June 2026), monorail-to-metro requires bus connection via Adly Mansour
+function generateMonorailFallback(A, B, fromName, toName) {
+  const aN = A.displayName, bN = B.displayName;
+  const aIsMono = A.lines.includes(4);
+  const metro = aIsMono ? B : A;
+  const metroAr = aIsMono ? B.ar : A.ar;
+  const metroName = aIsMono ? bN : aN;
+  const hub = stationData['Adly Mansour'];
+  const targetLine = metro.lines[0];
+
+  // Route within metro network from Adly Mansour hub to destination
+  let mLeg = { mins: 30, stops: 12 };
+  if (hub.lines.includes(targetLine)) {
+    const stops = Math.max(1, Math.abs(hub.pos[targetLine] - metro.pos[targetLine]));
+    mLeg = { mins: Math.max(4, stops * 2), stops };
+  } else {
+    const ixs = findInterchanges(hub.lines, [targetLine]);
+    if (ixs.length) {
+      const ix = stationData[ixs[0]];
+      const s1 = Math.max(1, Math.abs(hub.pos[hub.lines[0]] - ix.pos[hub.lines[0]]));
+      const s2 = Math.max(1, Math.abs(ix.pos[targetLine] - metro.pos[targetLine]));
+      mLeg = { mins: s1 * 2 + 3 + s2 * 2, stops: s1 + s2 };
+    }
+  }
+
+  const baseSegs = aIsMono ? [
+    { mode: 'walk', dur: 5, label: { en: `Walk to bus stop`, ar: `سير إلى موقف الأتوبيس` }},
+    { mode: 'bus',  line: 'CTA', dur: 28, stops: 14, label: { en: 'CTA Bus → Adly Mansour', ar: 'أتوبيس CTA → عدلي منصور' }},
+    { mode: 'metro', line: targetLine, dur: mLeg.mins, stops: mLeg.stops, label: { en: `Line ${targetLine} → ${metroName}`, ar: `الخط ${targetLine} → ${metroAr}` }},
+    { mode: 'walk', dur: 5, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+  ] : [
+    { mode: 'walk', dur: 5, label: { en: `Walk to ${aN} station`, ar: `سير إلى محطة ${A.ar}` }},
+    { mode: 'metro', line: targetLine, dur: mLeg.mins, stops: mLeg.stops, label: { en: `Line ${targetLine} → Adly Mansour`, ar: `الخط ${targetLine} → عدلي منصور` }},
+    { mode: 'bus',  line: 'CTA', dur: 28, stops: 14, label: { en: `CTA Bus → ${bN}`, ar: `أتوبيس CTA → ${B.ar}` }},
+    { mode: 'walk', dur: 5, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+  ];
+
+  return [{
+    id: 0,
+    totalMin: baseSegs.reduce((s, x) => s + x.dur, 0),
+    cost: 24,
+    co2: 1.5,
+    label: { en: 'Bus + Metro', ar: 'أتوبيس + مترو' },
+    segments: baseSegs,
+  }];
+}
+
+// Routes when both stations share a line (no transfer needed)
+function generateDirectRoutes(A, B, line, fromName, toName) {
+  const stops = Math.max(1, Math.abs(A.pos[line] - B.pos[line]));
+  const metroMin = Math.max(4, stops * 2);
+  const aN = A.displayName, bN = B.displayName;
+  const m = lineMode(line);
+  const ml = m === 'monorail' ? 'Monorail' : 'Line';
+  const mlAr = m === 'monorail' ? 'مونوريل' : 'الخط';
+  return [
+    {
+      id: 0,
+      totalMin: 3 + metroMin + 4,
+      cost: m === 'monorail' ? monorailFare(stops) : 10,
+      co2: 0.8,
+      label: { en: `Direct on ${ml} ${line}`, ar: `مباشر على ${mlAr} ${line}` },
+      segments: [
+        { mode: 'walk',  dur: 3, label: { en: `Walk to ${aN} station`, ar: `سير إلى محطة ${A.ar}` }},
+        { mode: m, line, dur: metroMin, stops, label: { en: `${ml} ${line} → ${bN}`, ar: `${mlAr} ${line} → ${B.ar}` }},
+        { mode: 'walk',  dur: 4, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+      ],
+    },
+    {
+      id: 1,
+      totalMin: 5 + Math.max(2, metroMin - 4) + 14 + 6,
+      cost: 7,
+      co2: 1.2,
+      label: { en: 'Bus + ' + (m === 'monorail' ? 'Monorail' : 'Metro'), ar: 'أتوبيس + ' + (m === 'monorail' ? 'مونوريل' : 'مترو') },
+      segments: [
+        { mode: 'walk', dur: 5, label: { en: 'Walk to CTA bus stop', ar: 'سير إلى موقف الأتوبيس' }},
+        { mode: 'bus',  line: '951', dur: 14, stops: 8, label: { en: 'CTA Bus 951', ar: 'أتوبيس النقل العام 951' }},
+        { mode: m, line, dur: Math.max(2, metroMin - 4), stops: Math.max(1, stops - 2), label: { en: `${ml} ${line} → ${bN}`, ar: `${mlAr} ${line} → ${B.ar}` }},
+        { mode: 'walk', dur: 6, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+      ],
+    },
+    {
+      id: 2,
+      totalMin: 4 + metroMin + 7,
+      cost: m === 'monorail' ? monorailFare(stops) : 9,
+      co2: 0.9,
+      label: { en: `Direct · longer walk`, ar: 'مباشر · مشي أطول' },
+      segments: [
+        { mode: 'walk',  dur: 4, label: { en: `Walk to ${aN} station`, ar: `سير إلى محطة ${A.ar}` }},
+        { mode: m, line, dur: metroMin, stops, label: { en: `${ml} ${line} → ${bN}`, ar: `${mlAr} ${line} → ${B.ar}` }},
+        { mode: 'walk',  dur: 7, label: { en: 'Scenic walk to destination', ar: 'سير ممتع إلى الوجهة' }},
+      ],
+    },
+  ];
+}
+
+// Routes when A and B are on different lines (need an interchange)
+function generateTransferRoutes(A, B, interchanges, fromName, toName) {
+  const aN = A.displayName, bN = B.displayName;
+  const results = [];
+
+  // Try each interchange (up to 2)
+  for (let i = 0; i < Math.min(2, interchanges.length); i++) {
+    const viaName = interchanges[i];
+    const via = stationData[viaName];
+    const fromLine = A.lines.find(l => via.lines.includes(l));
+    const toLine = B.lines.find(l => via.lines.includes(l));
+    const stops1 = Math.max(1, Math.abs(A.pos[fromLine] - via.pos[fromLine]));
+    const stops2 = Math.max(1, Math.abs(via.pos[toLine] - B.pos[toLine]));
+    const min1 = Math.max(3, stops1 * 2);
+    const min2 = Math.max(3, stops2 * 2);
+    results.push({
+      id: results.length,
+      totalMin: 3 + min1 + 3 + min2 + 5,
+      cost: 14,
+      co2: 1.0,
+      label: { en: `Via ${viaName}`, ar: `عبر ${via.ar}` },
+      segments: [
+        { mode: 'walk',  dur: 3, label: { en: `Walk to ${aN} station`, ar: `سير إلى محطة ${A.ar}` }},
+        { mode: 'metro', line: fromLine, dur: min1, stops: stops1, label: { en: `Line ${fromLine} → ${viaName}`, ar: `الخط ${fromLine} → ${via.ar}` }},
+        { mode: 'walk',  dur: 3, label: { en: `Transfer at ${viaName}`, ar: `تحويلة عند ${via.ar}` }},
+        { mode: 'metro', line: toLine, dur: min2, stops: stops2, label: { en: `Line ${toLine} → ${bN}`, ar: `الخط ${toLine} → ${B.ar}` }},
+        { mode: 'walk',  dur: 5, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+      ],
+    });
+  }
+
+  // Add a bus + metro cheapest alternative
+  const viaName = interchanges[0];
+  const via = stationData[viaName];
+  const toLine = B.lines.find(l => via.lines.includes(l));
+  const lastLeg = Math.max(3, Math.abs(via.pos[toLine] - B.pos[toLine]) * 2);
+  const lastStops = Math.max(2, Math.abs(via.pos[toLine] - B.pos[toLine]));
+  results.push({
+    id: results.length,
+    totalMin: 5 + 22 + lastLeg + 6,
+    cost: 8,
+    co2: 1.4,
+    label: { en: 'Cheapest · Bus + Metro', ar: 'الأرخص · أتوبيس + مترو' },
+    segments: [
+      { mode: 'walk', dur: 5, label: { en: 'Walk to CTA bus stop', ar: 'سير إلى موقف الأتوبيس' }},
+      { mode: 'bus',  line: '951', dur: 22, stops: 12, label: { en: `CTA Bus 951 → ${viaName}`, ar: `أتوبيس 951 → ${via.ar}` }},
+      { mode: 'metro', line: toLine, dur: lastLeg, stops: lastStops, label: { en: `Line ${toLine} → ${bN}`, ar: `الخط ${toLine} → ${B.ar}` }},
+      { mode: 'walk', dur: 6, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+    ],
+  });
+
+  return results.slice(0, 3);
+}
+
+// Routes for special destinations (airport, GUC, intercity etc.) that aren't directly on metro
+function generateSpecialRoutes(A, B, fromName, toName) {
+  const startIsSpecial = !!A.special;
+  const sp = startIsSpecial ? A : B;
+  const metro = startIsSpecial ? B : A;
+  const hub = stationData[sp.near];
+  const aN = A.displayName, bN = B.displayName;
+
+  // Connection mode: train (ENR intercity) vs bus
+  const cMode = sp.isTrain ? 'train' : 'bus';
+  const cTime = sp.isTrain ? sp.trainTime : sp.busTime;
+  const cLine = sp.isTrain ? sp.trainLine : sp.busLine;
+  const cStops = sp.isTrain ? sp.trainStops : sp.busStops;
+  const cCost = sp.cost || (sp.isTrain ? 95 : 14);
+
+  // Find the line connecting hub to metro (closest if multiple)
+  let line = hub.lines[0];
+  let hubStops = 6;
+  let hubMin = 12;
+  if (metro.lines) {
+    const sharedLine = metro.lines.find(l => hub.lines.includes(l));
+    if (sharedLine) {
+      line = sharedLine;
+      hubStops = Math.max(2, Math.abs(metro.pos[sharedLine] - hub.pos[sharedLine]));
+      hubMin = hubStops * 2;
+    } else {
+      // Need transfer to reach hub line — pick first interchange
+      const ixs = findInterchanges(metro.lines, hub.lines);
+      if (ixs.length) {
+        const ix = stationData[ixs[0]];
+        const metroLine = metro.lines.find(l => ix.lines.includes(l));
+        line = hub.lines.find(l => ix.lines.includes(l));
+        const s1 = Math.max(1, Math.abs(metro.pos[metroLine] - ix.pos[metroLine]));
+        const s2 = Math.max(1, Math.abs(ix.pos[line] - hub.pos[line]));
+        hubStops = s1 + s2;
+        hubMin = s1 * 2 + 3 + s2 * 2;
+      }
+    }
+  }
+  const m = lineMode(line);
+  const ml = m === 'monorail' ? 'Monorail' : 'Line';
+  const mlAr = m === 'monorail' ? 'مونوريل' : 'الخط';
+
+  // Labels for the connection leg
+  const cLabelEn = sp.isTrain ? `ENR Train → ${startIsSpecial ? bN : sp.displayName||sp.ar}` : `Bus ${cLine} → ${startIsSpecial ? bN : sp.displayName||sp.ar}`;
+  const cLabelAr = sp.isTrain ? `قطار ENR → ${startIsSpecial ? B.ar : sp.ar}` : `أتوبيس ${cLine} → ${startIsSpecial ? B.ar : sp.ar}`;
+
+  if (startIsSpecial) {
+    return [
+      {
+        id: 0,
+        totalMin: 5 + cTime + hubMin + 4,
+        cost: cCost + 4,
+        co2: sp.isTrain ? 0.9 : 1.4,
+        label: { en: sp.isTrain ? 'ENR Train + Metro' : 'Bus + Metro', ar: sp.isTrain ? 'قطار + مترو' : 'أتوبيس + مترو' },
+        segments: [
+          { mode: 'walk', dur: 5, label: { en: `Walk to ${aN} ${sp.isTrain ? 'station' : 'bus stop'}`, ar: `سير إلى ${A.ar}` }},
+          { mode: cMode, line: cLine, dur: cTime, stops: cStops, label: { en: sp.isTrain ? `ENR Train → ${hub.ar||sp.near}` : `Bus ${cLine} → ${sp.near}`, ar: sp.isTrain ? `قطار ENR → ${hub.ar}` : `أتوبيس ${cLine} → ${hub.ar}` }},
+          { mode: m, line, dur: hubMin, stops: hubStops, label: { en: `${ml} ${line} → ${bN}`, ar: `${mlAr} ${line} → ${B.ar}` }},
+          { mode: 'walk', dur: 4, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+        ],
+      },
+    ];
+  } else {
+    // Destination is special (airport, intercity, GUC)
+    return [
+      {
+        id: 0,
+        totalMin: 4 + hubMin + cTime + 5,
+        cost: cCost + 4,
+        co2: sp.isTrain ? 0.9 : 1.4,
+        label: { en: sp.isTrain ? 'Metro + ENR Train' : 'Metro + Bus', ar: sp.isTrain ? 'مترو + قطار' : 'مترو + أتوبيس' },
+        segments: [
+          { mode: 'walk', dur: 4, label: { en: `Walk to ${aN} station`, ar: `سير إلى محطة ${A.ar}` }},
+          { mode: m, line, dur: hubMin, stops: hubStops, label: { en: `${ml} ${line} → ${sp.near}`, ar: `${mlAr} ${line} → ${hub.ar}` }},
+          { mode: cMode, line: cLine, dur: cTime, stops: cStops, label: { en: cLabelEn, ar: cLabelAr }},
+          { mode: 'walk', dur: 5, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+        ],
+      },
+      // Cheap alternative for non-train (bus-only)
+      ...(sp.isTrain ? [] : [{
+        id: 1,
+        totalMin: 6 + 52 + 5,
+        cost: 9,
+        co2: 1.9,
+        label: { en: 'Bus only · cheapest', ar: 'أتوبيس فقط · الأرخص' },
+        segments: [
+          { mode: 'walk', dur: 6, label: { en: 'Walk to bus stop', ar: 'سير إلى موقف الأتوبيس' }},
+          { mode: 'bus',  line: cLine, dur: 52, stops: 26, label: { en: `Bus ${cLine} → ${bN}`, ar: `أتوبيس ${cLine} → ${B.ar}` }},
+          { mode: 'walk', dur: 5, label: { en: 'Walk to destination', ar: 'سير إلى الوجهة' }},
+        ],
+      }]),
+    ];
+  }
+}
+
+function defaultRoute(fromName, toName) {
+  return {
+    id: 0,
+    totalMin: 35,
+    cost: 14,
+    co2: 1.0,
+    label: { en: 'Estimated route', ar: 'مسار تقديري' },
+    segments: [
+      { mode: 'walk',  dur: 5, label: { en: `Walk from ${fromName}`, ar: 'سير' }},
+      { mode: 'metro', line: 1, dur: 20, stops: 10, label: { en: 'Metro', ar: 'مترو' }},
+      { mode: 'walk',  dur: 10, label: { en: `Walk to ${toName}`, ar: 'سير' }},
+    ],
+  };
+}
+
+// Compute or fetch cached routes for the current trip
+function ensureRoutes() {
+  const key = `${state.trip.from}->${state.trip.to}`;
+  if (state.routesKey !== key) {
+    state.routes = generateRoutes(state.trip.from, state.trip.to);
+    state.routesKey = key;
+    state.selectedRoute = bestRouteIdFor(state.routes, state.preference);
+  }
+  return state.routes;
+}
+
+// Walking time for sorting "least walking" preference
+function walkMin(r) { return r.segments.filter(s => s.mode === 'walk').reduce((sum, s) => sum + s.dur, 0); }
+
+function bestRouteIdFor(routes, pref) {
+  if (!routes || routes.length === 0) return 0;
+  let best = 0;
+  for (let i = 1; i < routes.length; i++) {
+    const a = routes[best], b = routes[i];
+    if (pref === 'cheapest'   && b.cost < a.cost) best = i;
+    else if (pref === 'leastWalk' && walkMin(b) < walkMin(a)) best = i;
+    else if (pref === 'fastest'   && b.totalMin < a.totalMin) best = i;
+  }
+  return routes[best].id;
+}
+
+// ============== ICONS ==============
+const icons = {
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8v10a1 1 0 01-1 1h-5v-7h-6v7H4a1 1 0 01-1-1V11z"/></svg>',
+  ticket: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a3 3 0 003 3v2a3 3 0 00-3 3v2h18v-2a3 3 0 00-3-3v-2a3 3 0 003-3V6H3v2z"/><path d="M14 5v14" stroke-dasharray="2 3"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2V6z"/><path d="M9 4v14M15 6v14"/></svg>',
+  user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
+  walk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="2"/><path d="M8 21l1.5-7 2.5 2 1 5"/><path d="M10 14l-2-5h4l2 3 3 2"/><path d="M5 11l3-2"/></svg>',
+  metro: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="5" y="3" width="14" height="14" rx="3"/><circle cx="9" cy="13" r="1" fill="currentColor"/><circle cx="15" cy="13" r="1" fill="currentColor"/><path d="M5 8h14"/><path d="M8 17l-2 4M16 17l2 4"/></svg>',
+  monorail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5 L20 5 L19 12 L17 13 L7 13 L5 12 Z"/><circle cx="9" cy="10" r="0.9" fill="currentColor"/><circle cx="15" cy="10" r="0.9" fill="currentColor"/><path d="M3 17 L21 17" stroke-width="2.5"/><path d="M7 17 L7 21 M17 17 L17 21"/></svg>',
+  bus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="4" y="3" width="16" height="14" rx="2"/><path d="M4 11h16"/><circle cx="8" cy="13" r="1" fill="currentColor"/><circle cx="16" cy="13" r="1" fill="currentColor"/><path d="M7 17l-1 3M17 17l1 3"/></svg>',
+  train: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M5 3h14v12a3 3 0 01-3 3H8a3 3 0 01-3-3V3z"/><path d="M5 9h14"/><circle cx="9" cy="13" r="1" fill="currentColor"/><circle cx="15" cy="13" r="1" fill="currentColor"/></svg>',
+  arrow: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 5l7 7-7 7"/></svg>',
+  arrowLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 5l-7 7 7 7"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  bolt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M13 3L4 14h7l-1 7 9-11h-7l1-7z"/></svg>',
+  coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9c0-1.5 1.5-2 3-2s3 .5 3 2-3 2-3 4 1.5 2 3 2"/><path d="M12 6v2M12 16v2"/></svg>',
+  swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16M3 8l4-4 4 4"/><path d="M17 20V4M13 16l4 4 4-4"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l8 3v7c0 5-3.5 9-8 10-4.5-1-8-5-8-10V5l8-3z"/><path d="M9 12l2 2 4-4"/></svg>',
+  apple: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.3 12.5c0-2.6 2.1-3.8 2.2-3.9-1.2-1.7-3.1-2-3.7-2-1.6-.2-3 .9-3.8.9s-2-.9-3.4-.9c-1.7 0-3.4 1-4.3 2.6-1.8 3.2-.5 7.9 1.3 10.5.9 1.2 1.9 2.6 3.3 2.6 1.3 0 1.8-.8 3.4-.8s2.1.8 3.4.8c1.4 0 2.3-1.3 3.2-2.5.7-1 1.2-2 1.6-3-2.5-.9-3.2-3.4-3.2-3.3zM14.5 4.5C15.3 3.6 15.8 2.4 15.7 1c-1.1 0-2.5.7-3.3 1.7-.7.8-1.4 2-1.2 3.3 1.2.1 2.5-.6 3.3-1.5z"/></svg>',
+  card: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>',
+  wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 7a2 2 0 012-2h14v4H5a2 2 0 010-4z"/><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="17" cy="13" r="1.5" fill="currentColor"/></svg>',
+  globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 8a6 6 0 0112 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 004 0"/></svg>',
+  pin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s-7-6-7-12a7 7 0 0114 0c0 6-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-11"/></svg>',
+  leaf: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 3c-3 0-9 1-12 4S5 16 5 19c3 0 9-1 12-4s4-9 4-12z"/><path d="M5 19c4-4 7-7 12-12"/></svg>',
+  pulse: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>',
+  fingerprint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12a7 7 0 0114 0v3"/><path d="M9 12a3 3 0 016 0v6"/><path d="M12 12v5M5 16v3"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 113 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>',
+  target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/></svg>',
+};
+
+const mode2icon = { walk: 'walk', metro: 'metro', bus: 'bus', train: 'train', monorail: 'monorail' };
+
+// ============== UTILITIES ==============
+function html(strings, ...values) {
+  return strings.reduce((acc, s, i) => acc + s + (values[i] ?? ''), '');
+}
+function ic(name, cls='w-5 h-5') { return `<span class="inline-block ${cls}">${icons[name]}</span>`; }
+
+function statusBar() {
+  return `
+    <div class="status-bar">
+      <span data-live="clock">${formatTime(liveData.now)}</span>
+      <div class="flex items-center gap-1.5">
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="9" width="3" height="3" rx="0.5"/><rect x="5" y="6" width="3" height="6" rx="0.5"/><rect x="10" y="3" width="3" height="9" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5"/></svg>
+        <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5c2-2 5-3 7-3s5 1 7 3"/><path d="M5 7c1-1 2.5-1.5 4-1.5s3 .5 4 1.5"/><path d="M8 9c.5-.5 1-1 2-1s1.5.5 2 1"/></svg>
+        <svg width="26" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="22" height="11" rx="2.5"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor"/><rect x="2" y="2" width="18" height="8" rx="1.5" fill="currentColor"/></svg>
+      </div>
+    </div>
+  `;
+}
+
+function langDir() { return state.lang === 'ar' ? 'rtl' : 'ltr'; }
+function fontClass() { return state.lang === 'ar' ? 'font-arabic' : ''; }
+
+// ============== LINE BADGE ==============
+function lineBadge(n) {
+  const colors = { 1: 'var(--line-1)', 2: 'var(--line-2)', 3: 'var(--line-3)' };
+  return `<span style="background:${colors[n]}" class="inline-flex items-center justify-center w-7 h-7 rounded-full text-white font-bold text-xs font-mono">${n}</span>`;
+}
+
+// ============== SCREEN: HOME ==============
+function renderHome() {
+  const L = t[state.lang];
+  return html`
+    <div class="screen ${fontClass()}" dir="${langDir()}">
+      ${statusBar()}
+      <div class="px-6 pt-2 pb-32">
+        <!-- Greeting -->
+        <div class="flex items-center justify-between mb-6 rise rise-d1">
+          <div>
+            <p class="text-sm" style="color: var(--ink-soft)">${L.greet}</p>
+            <h1 class="font-display text-3xl font-medium leading-tight">${state.lang === 'ar' ? state.user.nameAr : state.user.name}</h1>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleLang()" class="tap w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--bg-card); color:var(--ink); border:1px solid var(--line)">
+              <span class="text-xs font-bold font-mono">${state.lang === 'en' ? 'AR' : 'EN'}</span>
+            </button>
+            <button onclick="openModal('notifications')" class="tap w-10 h-10 rounded-full flex items-center justify-center relative" style="background:var(--bg-card); color:var(--ink); border:1px solid var(--line)">
+              ${ic('bell','w-5 h-5')}
+              <span class="absolute top-2 right-2 w-2 h-2 rounded-full pulse-dot" style="background:var(--red)"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Live next-monorail widget — ticks every second (nearest station to user) -->
+        <div onclick="openModal('monorail')" class="tap rise rise-d2 mb-6 rounded-2xl p-4 flex items-center gap-3" style="background:linear-gradient(135deg, var(--nile-deep) 0%, var(--nile) 100%); color:white">
+          <div class="flex flex-col items-center gap-1.5">
+            <span class="w-7 h-7 rounded-full flex items-center justify-center text-white font-bold font-mono text-xs" style="background:var(--line-4)">4</span>
+            <span class="w-1.5 h-1.5 rounded-full blink" style="background:#7AE8B0"></span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] uppercase tracking-widest font-bold" style="color:rgba(255,255,255,0.6)">${state.lang==='ar' ? 'أقرب محطة · وان ناينتي' : 'Nearest · One Ninety'}</p>
+            <p class="font-display text-xl font-medium leading-tight">
+              <span data-live-station="One Ninety">${liveData.nextTrains['One Ninety'].mins}:${String(liveData.nextTrains['One Ninety'].secs).padStart(2,'0')}</span>
+              <span class="text-xs font-normal" style="color:rgba(255,255,255,0.7)">${state.lang==='ar' ? 'حتى وصول المونوريل' : 'until next monorail'}</span>
+            </p>
+          </div>
+          <div class="text-right">
+            <p class="text-[10px] uppercase font-bold tracking-wider" style="color:rgba(255,255,255,0.6)">${state.lang==='ar' ? 'الاتجاه' : 'Toward'}</p>
+            <p class="text-xs font-semibold">${state.lang==='ar' ? 'مدينة العدالة' : 'Justice City'}</p>
+          </div>
+        </div>
+
+        <!-- Search bar -->
+        <button onclick="go('plan')" class="tap card w-full text-left p-4 mb-6 rise rise-d2" style="background:var(--bg-card)">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--nile); color:white">${ic('search','w-5 h-5')}</div>
+            <div>
+              <p class="text-xs font-medium" style="color:var(--ink-faint)">${L.where}</p>
+              <p class="font-display text-lg" style="color:var(--ink)">${L.planTrip}</p>
+            </div>
+          </div>
+        </button>
+
+        <!-- Quick destinations -->
+        <div class="rise rise-d3">
+          <h2 class="text-xs uppercase tracking-widest font-semibold mb-3" style="color:var(--ink-faint)">${L.quickPlaces}</h2>
+          <div class="grid grid-cols-4 gap-2 mb-7">
+            ${[
+              { i: 'home', label: L.home, color: 'var(--nile)', en: 'Fifth Settlement', ar: 'التجمع الخامس' },
+              { i: 'pin', label: L.work, color: 'var(--gold)', en: 'Tahrir', ar: 'التحرير' },
+              { i: 'map', label: L.university, color: 'var(--green)', en: 'GUC New Cairo', ar: 'الجامعة الألمانية' },
+              { i: 'train', label: L.airport, color: 'var(--red)', en: 'Cairo Airport', ar: 'مطار القاهرة' },
+            ].map(q => `
+              <button onclick="setDestination('${q.en}','${q.ar}')" class="tap flex flex-col items-center gap-2 p-3 rounded-2xl" style="background:var(--bg-card); border:1px solid var(--line)">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:${q.color}; color:white">${ic(q.i,'w-4 h-4')}</div>
+                <span class="text-[11px] font-medium" style="color:var(--ink-soft)">${q.label}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Live network status -->
+        <div class="rise rise-d4 mb-6">
+          <div class="flex items-baseline justify-between mb-3">
+            <h2 class="text-xs uppercase tracking-widest font-semibold" style="color:var(--ink-faint)">${L.liveStatus}</h2>
+            <div class="flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full pulse-dot" style="background:var(--green)"></span>
+              <span class="text-[10px] font-mono uppercase" style="color:var(--green)">Live</span>
+            </div>
+          </div>
+          <div class="card overflow-hidden">
+            ${[
+              { line: '1',   name: L.line1,   status: L.operational,       color: 'var(--line-1)', dot: 'var(--green)',     statusColor: 'var(--green)' },
+              { line: '2',   name: L.line2,   status: L.minorDelay,        color: 'var(--line-2)', dot: 'var(--gold)',      statusColor: 'var(--gold)' },
+              { line: '3',   name: L.line3,   status: L.operational,       color: 'var(--line-3)', dot: 'var(--green)',     statusColor: 'var(--green)' },
+              { line: '4',   name: L.line4,   status: L.partialService,    color: 'var(--line-4)', dot: 'var(--gold)',      statusColor: 'var(--gold)', detail: state.lang==='ar' ? '16 من 22 محطة' : '16 of 22 stations' },
+              { line: '5',   name: L.line5,   status: L.underConstruction, color: 'var(--line-5)', dot: 'var(--ink-faint)', statusColor: 'var(--ink-faint)', detail: state.lang==='ar' ? 'متوقع 2026' : 'Projected late 2026', dim: true },
+              { line: 'ENR', name: L.enrLine, status: L.operational,       color: 'var(--line-6)', dot: 'var(--green)',     statusColor: 'var(--green)' },
+            ].map((l, i, a) => `
+              <div class="flex items-center gap-3 px-4 py-3 ${i < a.length - 1 ? 'border-b' : ''}" style="border-color:var(--line); ${l.dim ? 'opacity:0.65' : ''}">
+                <span style="background:${l.color}" class="${l.line === 'ENR' ? 'px-1.5 h-7 rounded-md' : 'w-7 h-7 rounded-full'} flex items-center justify-center text-white font-bold font-mono text-[10px] flex-shrink-0">${l.line}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium truncate" style="color:var(--ink)">${l.name}</p>
+                  <p class="text-xs flex items-center gap-1.5" style="color:${l.statusColor}">
+                    <span class="w-1 h-1 rounded-full" style="background:${l.dot}"></span>
+                    <span>${l.status}</span>
+                    ${l.detail ? `<span style="color:var(--ink-faint)">· ${l.detail}</span>` : ''}
+                  </p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Recent trips -->
+        <div class="rise rise-d5">
+          <h2 class="text-xs uppercase tracking-widest font-semibold mb-3" style="color:var(--ink-faint)">${L.recentTrips}</h2>
+          <div class="space-y-2">
+            ${[
+              { fromEn: 'Fifth Settlement', fromAr: 'التجمع الخامس', toEn: 'Justice City', toAr: 'مدينة العدالة', time: '13.05', cost: 55 },
+              { fromEn: 'Fifth Settlement', fromAr: 'التجمع الخامس', toEn: 'GUC New Cairo', toAr: 'الجامعة الألمانية', time: '12.05', cost: 14 },
+            ].map(r => `
+              <div onclick="selectRecentTrip('${r.fromEn}','${r.fromAr}','${r.toEn}','${r.toAr}')" class="tap card-warm p-3 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--gold-soft); color:var(--nile)">${ic('clock','w-4 h-4')}</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium truncate" style="color:var(--ink)">${state.lang==='ar'?r.fromAr:r.fromEn} → ${state.lang==='ar'?r.toAr:r.toEn}</p>
+                  <p class="text-[11px]" style="color:var(--ink-faint)">${r.time} · ${r.cost} ${L.egp}</p>
+                </div>
+                ${ic('arrow','w-4 h-4')}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Footer attribution -->
+        <p class="text-[10px] text-center mt-8 rise rise-d6" style="color:var(--ink-faint)">${L.paid}</p>
+      </div>
+    </div>
+    ${bottomNav('home')}
+  `;
+}
+
+// ============== SCREEN: PLAN ==============
+function renderPlan() {
+  const L = t[state.lang];
+  return html`
+    <div class="screen ${fontClass()}" dir="${langDir()}">
+      ${statusBar()}
+      <div class="px-6 pt-2 pb-32">
+        <div class="flex items-center gap-3 mb-6 rise rise-d1">
+          <button onclick="go('home')" class="tap w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--bg-card); border:1px solid var(--line); color:var(--ink)">
+            ${ic('arrowLeft','w-5 h-5')}
+          </button>
+          <h1 class="font-display text-2xl font-medium">${L.planTrip}</h1>
+        </div>
+
+        <!-- From/To -->
+        <div class="card p-4 mb-5 rise rise-d2 relative">
+          <div onclick="openLocationPicker('from')" class="tap flex items-center gap-3 pb-3 border-b" style="border-color:var(--line)">
+            <div class="flex flex-col items-center pt-1">
+              <div class="w-3 h-3 rounded-full" style="background:var(--green)"></div>
+            </div>
+            <div class="flex-1">
+              <p class="text-[10px] uppercase font-semibold tracking-wider" style="color:var(--ink-faint)">${L.from}</p>
+              <p class="text-base font-medium" style="color:var(--ink)">${state.lang==='ar' ? state.trip.fromAr : state.trip.from}</p>
+            </div>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded-full" style="background:var(--nile-soft); color:var(--nile)">GPS</span>
+          </div>
+          <div onclick="openLocationPicker('to')" class="tap flex items-center gap-3 pt-3">
+            <div class="w-3 h-3 rounded-sm" style="background:var(--red)"></div>
+            <div class="flex-1">
+              <p class="text-[10px] uppercase font-semibold tracking-wider" style="color:var(--ink-faint)">${L.to}</p>
+              <p class="text-base font-medium" style="color:var(--ink)">${state.lang==='ar' ? state.trip.toAr : state.trip.to}</p>
+            </div>
+            ${ic('edit','w-4 h-4')}
+          </div>
+          <button onclick="event.stopPropagation(); swapTrip()" class="tap absolute right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--bg-warm); border:1px solid var(--line); color:var(--ink-soft)">
+            ${ic('swap','w-4 h-4')}
+          </button>
+        </div>
+
+        <!-- Time -->
+        <div onclick="openModal('timepicker')" class="tap card p-4 mb-5 rise rise-d3 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--gold-soft); color:var(--gold)">${ic('clock','w-5 h-5')}</div>
+          <div class="flex-1">
+            <p class="text-xs font-semibold" style="color:var(--ink-soft)">${state.lang==='ar' ? 'وقت المغادرة' : 'Departure time'}</p>
+            <p class="text-base font-medium" style="color:var(--ink)">${departureLabel()}</p>
+          </div>
+          <span class="text-xs font-semibold" style="color:var(--nile)">${L.changeTime}</span>
+        </div>
+
+        <!-- Preferences -->
+        <div class="rise rise-d4 mb-6">
+          <p class="text-xs uppercase tracking-widest font-semibold mb-3" style="color:var(--ink-faint)">${L.prefs}</p>
+          <div class="grid grid-cols-3 gap-2">
+            ${[
+              { id: 'fastest', i: 'bolt', label: L.fastest },
+              { id: 'cheapest', i: 'coin', label: L.cheapest },
+              { id: 'leastWalk', i: 'walk', label: L.leastWalk },
+            ].map(p => {
+              const active = state.preference === p.id;
+              return `
+                <button onclick="setPreference('${p.id}')" class="tap p-3 rounded-2xl text-center flex flex-col items-center gap-2" style="background:${active ? 'var(--nile)' : 'var(--bg-card)'}; color:${active ? 'white' : 'var(--ink)'}; border:1px solid ${active ? 'var(--nile)' : 'var(--line)'}">
+                  ${ic(p.i,'w-4 h-4')}
+                  <span class="text-[11px] font-semibold">${p.label}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Search button -->
+        <button onclick="go('results')" class="tap rise rise-d5 w-full py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2" style="background:var(--ink); color:var(--bg-warm)">
+          ${ic('search','w-5 h-5')}
+          <span>${L.search}</span>
+        </button>
+      </div>
+    </div>
+    ${bottomNav('home')}
+  `;
+}
+
+// ============== SCREEN: RESULTS ==============
+function renderResults() {
+  const L = t[state.lang];
+  return html`
+    <div class="screen ${fontClass()}" dir="${langDir()}">
+      ${statusBar()}
+      <div class="px-6 pt-2 pb-32">
+        <div class="flex items-center gap-3 mb-5 rise rise-d1">
+          <button onclick="go('plan')" class="tap w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--bg-card); border:1px solid var(--line); color:var(--ink)">
+            ${ic('arrowLeft','w-5 h-5')}
+          </button>
+          <div class="flex-1 min-w-0">
+            <p class="text-[10px] uppercase tracking-wider font-semibold" style="color:var(--ink-faint)">${L.routes}</p>
+            <p class="text-sm font-medium truncate" style="color:var(--ink)">${state.lang==='ar' ? state.trip.fromAr : state.trip.from} → ${state.lang==='ar' ? state.trip.toAr : state.trip.to}</p>
+          </div>
+        </div>
+
+        <!-- Map sketch -->
+        <div class="rise rise-d2 mb-5 rounded-2xl overflow-hidden relative" style="height:140px; border:1px solid var(--line)">
+          <div class="map-bg absolute inset-0"></div>
+          <!-- Sketched route line -->
+          <svg class="absolute inset-0 w-full h-full" viewBox="0 0 350 140" preserveAspectRatio="none">
+            <!-- Background streets -->
+            <path d="M0 80 L350 80" stroke="rgba(14,76,92,0.08)" stroke-width="3"/>
+            <path d="M120 0 L120 140" stroke="rgba(14,76,92,0.08)" stroke-width="3"/>
+            <path d="M240 0 L240 140" stroke="rgba(14,76,92,0.08)" stroke-width="3"/>
+            <!-- The route -->
+            <path d="M30 110 Q90 80 150 70 T280 30" stroke="var(--nile)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M30 110 Q90 80 150 70 T280 30" stroke="var(--gold)" stroke-width="3" fill="none" stroke-dasharray="2 6" stroke-linecap="round"/>
+            <!-- Start pin -->
+            <circle cx="30" cy="110" r="6" fill="var(--green)"/>
+            <circle cx="30" cy="110" r="3" fill="white"/>
+            <!-- End pin -->
+            <rect x="275" y="25" width="10" height="10" rx="1" fill="var(--red)"/>
+          </svg>
+          <span class="absolute top-3 left-3 text-[10px] font-mono px-2 py-0.5 rounded-full" style="background:rgba(255,255,255,0.85); color:var(--ink-soft)">8.4 km</span>
+        </div>
+
+        <p class="text-[11px] mb-3 rise rise-d2" style="color:var(--ink-faint)">${L.sortedBy}</p>
+
+        <!-- Route cards -->
+        <div class="space-y-3">
+          ${ensureRoutes().map((r, idx) => renderRouteCard(r, idx, L)).join('')}
+        </div>
+
+        <!-- Continue button -->
+        <button onclick="go('payment')" class="tap rise rise-d5 w-full py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 mt-6" style="background:var(--ink); color:var(--bg-warm)">
+          <span>${L.continue}</span>
+          ${ic('arrow','w-5 h-5')}
+        </button>
+      </div>
+    </div>
+    ${bottomNav('home')}
+  `;
+}
+
+function renderRouteCard(r, idx, L) {
+  const selected = state.selectedRoute === r.id;
+  const delay = `rise-d${3 + idx}`;
+  // Determine which route is the "best" given current preference (dynamic across any route set)
+  const bestId = bestRouteIdFor(state.routes || [r], state.preference);
+  const isBest = r.id === bestId;
+  const bestLabel = state.preference === 'cheapest'
+    ? { en: 'Cheapest', ar: 'الأرخص' }
+    : state.preference === 'leastWalk'
+      ? { en: 'Least walking', ar: 'أقل مشي' }
+      : { en: 'Fastest', ar: 'الأسرع' };
+  return `
+    <div onclick="selectRoute(${r.id})" class="tap route-card rise ${delay} card p-4 ${selected ? 'selected' : ''}">
+      <div class="flex items-start justify-between mb-3">
+        <div class="flex items-baseline gap-2">
+          ${r.totalMin >= 60
+            ? `<span class="font-display text-2xl font-medium" style="color:var(--ink)">${Math.floor(r.totalMin/60)}<span style="font-size:14px; font-weight:500">h</span> ${r.totalMin%60}</span><span class="text-xs font-medium" style="color:var(--ink-soft)">${L.mins}</span>`
+            : `<span class="font-display text-2xl font-medium" style="color:var(--ink)">${r.totalMin}</span><span class="text-xs font-medium" style="color:var(--ink-soft)">${L.mins}</span>`
+          }
+          ${isBest ? `<span class="ml-1 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider" style="background:var(--nile); color:white">${bestLabel[state.lang]}</span>` : ''}
+        </div>
+        <div class="text-right">
+          <p class="font-display text-xl" style="color:var(--ink)">${r.cost}</p>
+          <p class="text-[10px] uppercase font-semibold" style="color:var(--ink-faint)">${L.egp}</p>
+        </div>
+      </div>
+      <!-- Mode chain -->
+      <div class="flex items-center gap-1.5 mb-2">
+        ${r.segments.map((s, i) => `
+          <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg" style="background:var(--bg-warm); color:var(--ink-soft)">
+            ${ic(mode2icon[s.mode], 'w-3.5 h-3.5')}
+            <span class="text-[10px] font-mono font-semibold">${s.dur >= 60 ? Math.floor(s.dur/60)+'h '+(s.dur%60)+'m' : s.dur}</span>
+            ${s.line && (s.mode === 'metro' || s.mode === 'monorail') ? `<span class="w-3.5 h-3.5 rounded-full flex items-center justify-center text-white font-bold text-[8px] font-mono" style="background:var(--line-${s.line})">${s.line}</span>` : ''}
+            ${s.mode === 'train' ? `<span class="text-[9px] font-mono font-bold px-1 rounded" style="background:var(--line-6); color:white">ENR</span>` : ''}
+            ${s.line && s.mode === 'bus' ? `<span class="text-[9px] font-mono font-bold">${s.line}</span>` : ''}
+          </div>
+          ${i < r.segments.length - 1 ? `<span style="color:var(--ink-faint)">·</span>` : ''}
+        `).join('')}
+      </div>
+      ${!isBest ? `<p class="text-[11px]" style="color:var(--ink-faint)">${r.label[state.lang]}</p>` : ''}
+      ${selected ? `
+        <div class="mt-3 pt-3 border-t" style="border-color:var(--line)">
+          ${r.segments.map((s, i) => `
+            <div class="flex items-center gap-3 py-1.5">
+              <div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style="background:${(s.mode==='metro'||s.mode==='monorail') ? `var(--line-${s.line})` : s.mode==='train' ? 'var(--line-6)' : s.mode==='bus' ? 'var(--gold)' : 'var(--ink-faint)'}; color:white">${ic(mode2icon[s.mode],'w-3.5 h-3.5')}</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-medium" style="color:var(--ink)">${s.label[state.lang]}</p>
+                ${(() => { const d = s.dur >= 60 ? Math.floor(s.dur/60) + 'h ' + (s.dur%60) + 'm' : s.dur + ' ' + L.mins; return s.stops ? `<p class="text-[10px]" style="color:var(--ink-faint)">${s.stops} ${state.lang==='ar' ? 'محطات' : 'stops'} · ${d}</p>` : `<p class="text-[10px]" style="color:var(--ink-faint)">${d}</p>`; })()}
+              </div>
+            </div>
+          `).join('')}
+          <div class="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg" style="background:var(--gold-soft)">
+            ${ic('leaf','w-3.5 h-3.5')}
+            <span class="text-[10px] font-medium" style="color:var(--ink-soft)">${state.lang==='ar' ? 'تقلل من انبعاثات الكربون' : `Saves ${r.co2} kg CO₂ vs driving`}</span>
+          </div>
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+// ============== SCREEN: PAYMENT ==============
+function renderPayment() {
+  const L = t[state.lang];
+  const rs = ensureRoutes();
+  const r = rs.find(x => x.id === state.selectedRoute) || rs[0];
+  return html`
+    <div class="screen ${fontClass()}" dir="${langDir()}">
+      ${statusBar()}
+      <div class="px-6 pt-2 pb-32">
+        <div class="flex items-center gap-3 mb-6 rise rise-d1">
+          <button onclick="go('results')" class="tap w-10 h-10 rounded-full flex items-center justify-center" style="background:var(--bg-card); border:1px solid var(--line); color:var(--ink)">
+            ${ic('arrowLeft','w-5 h-5')}
+          </button>
+          <h1 class="font-display text-2xl font-medium">${L.paymentTitle}</h1>
+        </div>
+
+        <!-- Trip summary -->
+        <div class="card p-4 mb-5 rise rise-d2">
+          <p class="text-[10px] uppercase tracking-widest font-semibold mb-3" style="color:var(--ink-faint)">${L.summary}</p>
+          <div class="flex items-center gap-3 mb-3">
+            <div class="flex flex-col items-center">
+              <div class="w-3 h-3 rounded-full" style="background:var(--green)"></div>
+              <div class="w-px h-6" style="background:var(--line)"></div>
+              <div class="w-3 h-3 rounded-sm" style="background:var(--red)"></div>
+            </div>
+            <div class="flex-1 flex flex-col gap-3.5">
+              <p class="text-sm font-medium" style="color:var(--ink)">${state.lang==='ar' ? state.trip.fromAr : state.trip.from}</p>
+              <p class="text-sm font-medium" style="color:var(--ink)">${state.lang==='ar' ? state.trip.toAr : state.trip.to}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 pt-3 border-t" style="border-color:var(--line)">
+            ${r.segments.map(s => `
+              <div class="flex items-center gap-1 px-2 py-1 rounded-md" style="background:var(--bg-warm)">
+                ${ic(mode2icon[s.mode],'w-3 h-3')}
+                <span class="text-[10px] font-mono font-semibold">${s.dur}</span>
+              </div>
+            `).join('')}
+            <span class="ml-auto text-xs font-medium" style="color:var(--ink-soft)">${r.totalMin} ${L.mins}</span>
+          </div>
+        </div>
+
+        <!-- Payment methods -->
+        <p class="text-xs uppercase tracking-widest font-semibold mb-3 rise rise-d3" style="color:var(--ink-faint)">${L.payWith}</p>
+        <div class="space-y-2 mb-5 rise rise-d4">
+          ${[
+            { id: 'paymob', label: L.paymob, sub: 'Visa •••• 4521', i: 'card' },
+            { id: 'applepay', label: L.applePay, sub: 'iPhone Face ID', i: 'apple' },
+            { id: 'wallet', label: L.wallet, sub: '42.50 EGP', i: 'wallet' },
+          ].map(p => {
+            const sel = state.paymentMethod === p.id;
+            return `
+              <button onclick="setPay('${p.id}')" class="tap w-full card p-3 flex items-center gap-3 text-left ${sel ? 'route-card selected' : ''}">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:${sel ? 'var(--nile)' : 'var(--bg-warm)'}; color:${sel ? 'white' : 'var(--ink)'}">${ic(p.i, 'w-5 h-5')}</div>
+                <div class="flex-1">
+                  <p class="text-sm font-semibold" style="color:var(--ink)">${p.label}</p>
+                  <p class="text-[11px]" style="color:var(--ink-faint)">${p.sub}</p>
+                </div>
+                <div class="radio ${sel ? 'selected' : ''}"></div>
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        <!-- Total -->
+        <div class="card-warm p-4 mb-5 rise rise-d5 flex items-baseline justify-between">
+          <span class="text-sm font-semibold" style="color:var(--ink-soft)">${L.totalLabel}</span>
+          <div class="flex items-baseline gap-1.5">
+            <span class="font-display text-3xl font-medium" style="color:var(--ink)">${r.cost}.00</span>
+            <span class="text-xs uppercase font-semibold" style="color:var(--ink-faint)">${L.egp}</span>
+          </div>
+        </div>
+
+        <!-- Security note -->
+        <div class="flex items-center gap-2 mb-5 rise rise-d5">
+          ${ic('shield','w-3.5 h-3.5')}
+          <span class="text-[11px]" style="color:var(--ink-faint)">PCI-DSS · AES-256 · ${state.lang==='ar' ? 'متوافق مع قانون حماية البيانات المصري' : 'Egyptian Data Protection compliant'}</span>
+        </div>
+
+        <!-- Pay button -->
+        <button onclick="go('ticket')" class="tap rise rise-d6 w-full py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2" style="background:var(--gold); color:var(--ink)">
+          ${ic('fingerprint','w-5 h-5')}
+          <span>${L.paySecure} · ${r.cost} ${L.egp}</span>
+        </button>
+      </div>
+    </div>
+    ${bottomNav('home')}
+  `;
+}
+
+// ============== SCREEN: TICKET (QR) ==============
+function renderTicket() {
+  const L = t[state.lang];
+  const rs = ensureRoutes();
+  const r = rs.find(x => x.id === state.selectedRoute) || rs[0];
+  return html`
+    <div class="screen ${fontClass()}" dir="${langDir()}" style="background:linear-gradient(180deg, var(--nile-deep) 0%, var(--nile) 50%, var(--bg-warm) 100%)">
+      ${statusBar()}
+      <div class="px-6 pt-2 pb-32 text-white">
+        <div class="flex items-center justify-between mb-6 rise rise-d1">
+          <button onclick="go('results')" class="tap w-10 h-10 rounded-full flex items-center justify-center" style="background:rgba(255,255,255,0.12); color:white">
+            ${ic('arrowLeft','w-5 h-5')}
+          </button>
+          <div class="flex items-center gap-1.5 px-3 py-1 rounded-full" style="background:rgba(45,125,85,0.25); border:1px solid rgba(255,255,255,0.15)">
+            <span class="w-1.5 h-1.5 rounded-full pulse-dot" style="background:#7AE8B0"></span>
+            <span class="text-[10px] font-mono uppercase font-bold">${L.ticketActive}</span>
+          </div>
+          <div class="w-10"></div>
+        </div>
+
+        <p class="text-center text-[11px] uppercase tracking-widest font-semibold mb-2 rise rise-d2" style="color:rgba(255,255,255,0.6)">${L.validFor}</p>
+        <p class="text-center font-display text-4xl mb-7 rise rise-d2"><span id="timer">120:00</span> ${state.lang==='ar' ? 'د' : 'min'}</p>
+
+        <!-- Ticket card -->
+        <div class="rise rise-d3 rounded-3xl overflow-hidden" style="background:var(--bg-card); color:var(--ink); box-shadow:0 30px 60px -20px rgba(0,0,0,0.4)">
+          <!-- Trip header -->
+          <div class="p-5" style="background:linear-gradient(135deg, var(--gold-soft) 0%, #FFF 100%)">
+            <div class="flex items-baseline justify-between mb-3">
+              <span class="text-[10px] uppercase tracking-widest font-bold" style="color:var(--gold)">Mishwari · مشواري</span>
+              <span class="text-[10px] font-mono" style="color:var(--ink-faint)">#MW-2026-${String(Math.floor(Math.random()*99999)).padStart(5,'0')}</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex flex-col items-center">
+                <div class="w-3.5 h-3.5 rounded-full" style="background:var(--green)"></div>
+                <div class="w-px flex-1 my-1" style="background:var(--line); min-height:24px"></div>
+                <div class="w-3.5 h-3.5 rounded-sm" style="background:var(--red)"></div>
+              </div>
+              <div class="flex-1 flex flex-col gap-2.5">
+                <div>
+                  <p class="text-[9px] uppercase font-bold tracking-wider" style="color:var(--ink-faint)">${L.from}</p>
+                  <p class="font-display text-lg font-medium leading-none">${state.lang==='ar' ? state.trip.fromAr : state.trip.from}</p>
+                </div>
+                <div>
+                  <p class="text-[9px] uppercase font-bold tracking-wider" style="color:var(--ink-faint)">${L.to}</p>
+                  <p class="font-display text-lg font-medium leading-none">${state.lang==='ar' ? state.trip.toAr : state.trip.to}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Perforation -->
+          <div class="relative h-5" style="background:var(--bg-card)">
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-6 rounded-r-full" style="background:var(--nile)"></div>
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-6 rounded-l-full" style="background:var(--bg-warm)"></div>
+            <div class="absolute inset-x-5 top-1/2 -translate-y-1/2 h-px" style="background-image:linear-gradient(to right, var(--line) 50%, transparent 0%); background-size:8px 1px"></div>
+          </div>
+
+          <!-- QR code -->
+          <div class="p-5 pt-3">
+            <div class="qr-reveal mx-auto mb-4" style="width:200px; height:200px">
+              ${renderQR()}
+            </div>
+            <p class="text-center text-[10px] font-mono uppercase tracking-widest mb-3" style="color:var(--ink-faint)">9F2A·7BE4·CC81·D03A</p>
+
+            <div class="flex items-center justify-center gap-1.5 mb-4">
+              ${ic('shield','w-3 h-3')}
+              <span class="text-[10px] font-medium" style="color:var(--ink-soft)">${L.encrypted}</span>
+            </div>
+
+            <!-- Trip details -->
+            <div class="grid grid-cols-3 gap-2 pt-3 border-t" style="border-color:var(--line)">
+              <div class="text-center">
+                <p class="text-[9px] uppercase font-bold tracking-wider" style="color:var(--ink-faint)">${L.mins}</p>
+                <p class="font-display text-lg">${r.totalMin}</p>
+              </div>
+              <div class="text-center">
+                <p class="text-[9px] uppercase font-bold tracking-wider" style="color:var(--ink-faint)">${L.egp}</p>
+                <p class="font-display text-lg">${r.cost}</p>
+              </div>
+              <div class="text-center">
+                <p class="text-[9px] uppercase font-bold tracking-wider" style="color:var(--ink-faint)">CO₂</p>
+                <p class="font-display text-lg">${r.co2}<span class="text-xs">kg</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p class="text-center text-[11px] mt-5 rise rise-d4" style="color:rgba(255,255,255,0.65)">${L.showProof}</p>
+      </div>
+    </div>
+    ${bottomNav('ticket')}
+  `;
+}
+
+// Generate a believable QR pattern as SVG. Not a real scannable QR but visually convincing.
+function renderQR() {
+  const N = 25; // grid size
+  // Seeded pseudo-random data
+  const seed = 'MASAR-MT-2026-DEMO-INSY714';
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) & 0xffffffff;
+  function rnd(i) { h = (h * 1664525 + 1013904223) & 0xffffffff; return ((h >>> 0) % 1000) / 1000; }
+
+  const cells = [];
+  for (let y = 0; y < N; y++) {
+    for (let x = 0; x < N; x++) {
+      // Position detection squares: top-left, top-right, bottom-left
+      const inFinder = (x, y) =>
+        (x < 7 && y < 7) || (x >= N - 7 && y < 7) || (x < 7 && y >= N - 7);
+      if (inFinder(x, y)) continue;
+      // Alignment pattern bottom-right
+      if (x >= N - 9 && x <= N - 5 && y >= N - 9 && y <= N - 5) continue;
+      const v = rnd(x * 31 + y);
+      if (v > 0.48) cells.push({ x, y });
+    }
+  }
+
+  // Build SVG
+  const cell = 8;
+  const W = N * cell;
+  let svg = `<svg viewBox="0 0 ${W} ${W}" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">`;
+  svg += `<rect width="${W}" height="${W}" fill="white"/>`;
+  // Finder patterns
+  function finder(cx, cy) {
+    return `
+      <rect x="${cx * cell}" y="${cy * cell}" width="${7 * cell}" height="${7 * cell}" fill="var(--ink)"/>
+      <rect x="${(cx + 1) * cell}" y="${(cy + 1) * cell}" width="${5 * cell}" height="${5 * cell}" fill="white"/>
+      <rect x="${(cx + 2) * cell}" y="${(cy + 2) * cell}" width="${3 * cell}" height="${3 * cell}" fill="var(--ink)"/>
+    `;
+  }
+  svg += finder(0, 0);
+  svg += finder(N - 7, 0);
+  svg += finder(0, N - 7);
+  // Alignment pattern
+  svg += `<rect x="${(N - 9) * cell}" y="${(N - 9) * cell}" width="${5 * cell}" height="${5 * cell}" fill="var(--ink)"/>`;
+  svg += `<rect x="${(N - 8) * cell}" y="${(N - 8) * cell}" width="${3 * cell}" height="${3 * cell}" fill="white"/>`;
+  svg += `<rect x="${(N - 7) * cell}" y="${(N - 7) * cell}" width="${cell}" height="${cell}" fill="var(--ink)"/>`;
+  // Timing patterns
+  for (let i = 8; i < N - 8; i++) {
+    if (i % 2 === 0) {
+      svg += `<rect x="${i * cell}" y="${6 * cell}" width="${cell}" height="${cell}" fill="var(--ink)"/>`;
+      svg += `<rect x="${6 * cell}" y="${i * cell}" width="${cell}" height="${cell}" fill="var(--ink)"/>`;
+    }
+  }
+  // Data cells
+  for (const c of cells) {
+    svg += `<rect x="${c.x * cell}" y="${c.y * cell}" width="${cell}" height="${cell}" fill="var(--ink)"/>`;
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+// ============== SCREEN: PROFILE ==============
+function renderProfile() {
+  const L = t[state.lang];
+  return html`
+    <div class="screen ${fontClass()}" dir="${langDir()}">
+      ${statusBar()}
+      <div class="px-6 pt-2 pb-32">
+        <h1 class="font-display text-3xl font-medium mb-5 rise rise-d1">${L.profile}</h1>
+
+        <!-- User card -->
+        <div class="card-warm p-5 mb-5 rise rise-d2 flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full flex items-center justify-center font-display text-2xl font-medium text-white" style="background:linear-gradient(135deg, var(--nile) 0%, var(--gold) 100%)">${state.lang==='ar' ? 'س' : 'S'}</div>
+          <div class="flex-1 min-w-0">
+            <p class="font-display text-xl font-medium" style="color:var(--ink)">${state.lang==='ar' ? state.user.nameAr + ' الأنصاري' : state.user.name + ' Elanssary'}</p>
+            <p class="text-xs truncate" style="color:var(--ink-soft)">sarah.elanssary@mishwari.gov.eg</p>
+            <div class="flex items-center gap-1.5 mt-1.5 flex-wrap">
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded flex items-center gap-1" style="background:var(--green); color:white">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                ${state.lang==='ar' ? 'هوية موثقة' : 'NID VERIFIED'}
+              </span>
+              <span class="text-[10px] font-mono tracking-wider" style="color:var(--ink-soft)">••••••••••0221</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Impact stats -->
+        <p class="text-xs uppercase tracking-widest font-semibold mb-3 rise rise-d3" style="color:var(--ink-faint)">${L.yourImpact}</p>
+        <div class="grid grid-cols-2 gap-3 mb-6 rise rise-d3">
+          <div class="card p-4">
+            <div class="flex items-center gap-2 mb-2">
+              ${ic('pulse','w-4 h-4')}
+              <span class="text-[10px] uppercase font-semibold tracking-wider" style="color:var(--ink-faint)">${L.trips}</span>
+            </div>
+            <p class="font-display text-3xl font-medium" style="color:var(--ink)">${state.user.stat.trips}</p>
+          </div>
+          <div class="card p-4">
+            <div class="flex items-center gap-2 mb-2">
+              ${ic('coin','w-4 h-4')}
+              <span class="text-[10px] uppercase font-semibold tracking-wider" style="color:var(--ink-faint)">${L.savedVs}</span>
+            </div>
+            <p class="font-display text-3xl font-medium" style="color:var(--green)">${state.user.stat.saved}<span class="text-sm"> ${L.egp}</span></p>
+          </div>
+        </div>
+
+        <!-- Language toggle -->
+        <p class="text-xs uppercase tracking-widest font-semibold mb-3 rise rise-d4" style="color:var(--ink-faint)">${L.language}</p>
+        <div class="card p-2 mb-5 rise rise-d4 grid grid-cols-2 gap-1">
+          <button onclick="setLang('en')" class="tap py-3 rounded-xl font-semibold" style="background:${state.lang==='en' ? 'var(--ink)' : 'transparent'}; color:${state.lang==='en' ? 'var(--bg-warm)' : 'var(--ink-soft)'}">${L.english}</button>
+          <button onclick="setLang('ar')" class="tap py-3 rounded-xl font-arabic font-semibold" style="background:${state.lang==='ar' ? 'var(--ink)' : 'transparent'}; color:${state.lang==='ar' ? 'var(--bg-warm)' : 'var(--ink-soft)'}">${L.arabic}</button>
+        </div>
+
+        <!-- Recent tickets -->
+        <p class="text-xs uppercase tracking-widest font-semibold mb-3 rise rise-d5" style="color:var(--ink-faint)">${state.lang==='ar' ? 'التذاكر السابقة' : 'Past tickets'}</p>
+        <div class="space-y-2 rise rise-d5">
+          ${[
+            { fromEn: 'Fifth Settlement', fromAr: 'التجمع الخامس', toEn: 'Tahrir', toAr: 'التحرير', date: '13.05', cost: 22 },
+            { fromEn: 'Fifth Settlement', fromAr: 'التجمع الخامس', toEn: 'Justice City', toAr: 'مدينة العدالة', date: '09.05', cost: 55 },
+            { fromEn: 'GUC New Cairo', fromAr: 'الجامعة الألمانية', toEn: 'Alexandria', toAr: 'الإسكندرية', date: '01.05', cost: 98 },
+          ].map(r => `
+            <div onclick="selectRecentTrip('${r.fromEn}','${r.fromAr}','${r.toEn}','${r.toAr}')" class="tap card p-3 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center" style="background:var(--nile-soft); color:var(--nile)">${ic('check','w-4 h-4')}</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate" style="color:var(--ink)">${state.lang==='ar'?r.fromAr:r.fromEn} → ${state.lang==='ar'?r.toAr:r.toEn}</p>
+                <p class="text-[11px]" style="color:var(--ink-faint)">${r.date} · ${r.cost} ${L.egp}</p>
+              </div>
+              ${ic('arrow','w-4 h-4')}
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- About Mishwari · Project targets (from Ministry of Transportation charter) -->
+        <p class="text-xs uppercase tracking-widest font-semibold mt-6 mb-3 rise rise-d6" style="color:var(--ink-faint)">${state.lang==='ar' ? 'حول مشواري' : 'About Mishwari'}</p>
+        <div class="card p-4 rise rise-d6" style="background:linear-gradient(135deg, var(--nile-deep) 0%, var(--nile) 100%); color:white">
+          <div class="flex items-center gap-2 mb-3">
+            <svg viewBox="0 0 60 60" width="20" height="20"><path d="M14 17 Q 22 36, 40 39" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/><circle cx="14" cy="17" r="5" fill="white"/><circle cx="40" cy="40" r="6" fill="#F5C56C"/></svg>
+            <p class="text-xs font-semibold uppercase tracking-wider" style="opacity:0.85">${state.lang==='ar' ? 'الأهداف الوطنية' : 'National targets'}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <p class="font-display text-2xl font-medium leading-none">50K+</p>
+              <p class="text-[10px] mt-1" style="opacity:0.75">${state.lang==='ar' ? 'تنزيلات في 3 شهور' : 'Downloads in 3 months'}</p>
+            </div>
+            <div>
+              <p class="font-display text-2xl font-medium leading-none">100K</p>
+              <p class="text-[10px] mt-1" style="opacity:0.75">${state.lang==='ar' ? 'مستخدم متزامن' : 'Concurrent users'}</p>
+            </div>
+            <div>
+              <p class="font-display text-2xl font-medium leading-none">95%</p>
+              <p class="text-[10px] mt-1" style="opacity:0.75">${state.lang==='ar' ? 'نسبة نجاح المعاملات' : 'Transaction success'}</p>
+            </div>
+            <div>
+              <p class="font-display text-2xl font-medium leading-none">98%</p>
+              <p class="text-[10px] mt-1" style="opacity:0.75">${state.lang==='ar' ? 'دقة مسح QR' : 'QR scanning accuracy'}</p>
+            </div>
+          </div>
+          <div class="mt-4 pt-3 flex items-center gap-2" style="border-top:1px solid rgba(255,255,255,0.18)">
+            <span class="text-[9px] uppercase tracking-widest" style="opacity:0.7">${state.lang==='ar' ? 'مصادر الجداول' : 'Schedule sources'}</span>
+            <div class="flex items-center gap-1.5 ml-auto">
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded" style="background:rgba(255,255,255,0.18)">CTA</span>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded" style="background:rgba(255,255,255,0.18)">ENR</span>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded" style="background:rgba(255,255,255,0.18)">METRO</span>
+              <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded" style="background:rgba(255,255,255,0.18)">MONO</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${bottomNav('profile')}
+  `;
+}
+
+// ============== SCREEN: PHONE HOME (iOS-style) ==============
+function noDemo() {
+  showToast(state.lang === 'ar' ? 'هذا التطبيق ليس جزءاً من العرض' : 'Not part of this demo');
+}
+function appTile(a) {
+  const badge = a.badge ? `<span class="notif-badge">${a.badge}</span>` : '';
+  return `
+    <button onclick="${a.onclick || 'noDemo()'}" class="app-tile tap">
+      <div class="icon-wrap">
+        <div class="app-icon" style="background:${a.bg}">${a.svg}</div>
+        ${badge}
+      </div>
+      <span class="app-label">${a.name}</span>
+    </button>
+  `;
+}
+
+// Compact SVG library for fake iOS apps (classic colorful iOS style)
+const appSvg = {
+  messages: '<svg viewBox="0 0 32 32" width="34" height="34" fill="white"><path d="M16 5c-6.6 0-12 4.2-12 9.4 0 2.9 1.5 5.5 4 7.2-.3 1.3-.8 2.6-1.5 3.5-.2.3-.1.7.3.7 2.1-.1 4-.7 5.7-1.7 1.1.3 2.3.5 3.5.5 6.6 0 12-4.2 12-9.4S22.6 5 16 5z"/></svg>',
+  facetime: '<svg viewBox="0 0 32 32" width="32" height="32" fill="white"><path d="M5 9 L19 9 Q21 9 21 11 L21 21 Q21 23 19 23 L5 23 Q3 23 3 21 L3 11 Q3 9 5 9 Z M21 14 L28 10 L28 22 L21 18 Z"/></svg>',
+  calendar: (() => { const now = new Date(); const dow = now.toLocaleDateString('en-US', {weekday:'short'}).toUpperCase(); const dn = now.getDate(); return `<svg viewBox="0 0 56 56" width="56" height="56"><text x="28" y="15" text-anchor="middle" fill="#FF3B30" font-size="9" font-weight="700" font-family="DM Sans">${dow}</text><text x="28" y="44" text-anchor="middle" fill="#1A1A1A" font-size="26" font-weight="300" font-family="DM Sans">${dn}</text></svg>`; })(),
+  reminders: '<svg viewBox="0 0 32 32" width="32" height="32"><circle cx="9" cy="11" r="2.5" fill="none" stroke="#FF3B30" stroke-width="1.6"/><line x1="14" y1="11" x2="25" y2="11" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="18" r="2.5" fill="none" stroke="#FF3B30" stroke-width="1.6"/><line x1="14" y1="18" x2="23" y2="18" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="25" r="2.5" fill="none" stroke="#FF3B30" stroke-width="1.6"/><line x1="14" y1="25" x2="21" y2="25" stroke="#1A1A1A" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  notes: '<svg viewBox="0 0 36 36" width="36" height="36"><line x1="9" y1="14" x2="27" y2="14" stroke="#A87A2E" stroke-width="0.8"/><line x1="9" y1="18" x2="27" y2="18" stroke="#A87A2E" stroke-width="0.8"/><line x1="9" y1="22" x2="27" y2="22" stroke="#A87A2E" stroke-width="0.8"/><line x1="9" y1="26" x2="22" y2="26" stroke="#A87A2E" stroke-width="0.8"/></svg>',
+  photos: '<svg viewBox="0 0 36 36" width="36" height="36"><g transform="translate(18,18)"><circle cx="0" cy="-9" r="5.5" fill="#FFD54F"/><circle cx="8.5" cy="-3" r="5.5" fill="#FF7043"/><circle cx="5.5" cy="7" r="5.5" fill="#E91E63"/><circle cx="-5.5" cy="7" r="5.5" fill="#9C27B0"/><circle cx="-8.5" cy="-3" r="5.5" fill="#42A5F5"/><circle cx="3.5" cy="-3" r="3" fill="#FFE082"/></g></svg>',
+  camera: '<svg viewBox="0 0 32 32" width="32" height="32"><circle cx="16" cy="16" r="9.5" fill="#1A1A1A" stroke="#666" stroke-width="1.2"/><circle cx="16" cy="16" r="6.5" fill="#0A0A0A"/><circle cx="16" cy="16" r="4.5" fill="none" stroke="#444" stroke-width="0.8"/><circle cx="14" cy="14" r="1.5" fill="white" opacity="0.6"/></svg>',
+  maps: '<svg viewBox="0 0 36 36" width="36" height="36"><path d="M14 5 L14 28 M22 8 L22 31" stroke="#A8C18E" stroke-width="0.8"/><path d="M8 19 L18 13 L26 22" stroke="#1976D2" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="18" cy="13" r="3" fill="#E53935"/><circle cx="18" cy="13" r="1" fill="white"/></svg>',
+  weather: '<svg viewBox="0 0 36 36" width="36" height="36"><circle cx="25" cy="11" r="6" fill="#FFC857"/><path d="M9 26 Q4 26 4 21 Q4 16 9 16 Q10 11 16 11 Q22 11 23 17 Q28 17 28 22 Q28 26 23 26 Z" fill="white"/></svg>',
+  clock: '<svg viewBox="0 0 36 36" width="36" height="36"><circle cx="18" cy="18" r="14" fill="white"/><g stroke="#222" stroke-width="0.6"><line x1="18" y1="6" x2="18" y2="8"/><line x1="18" y1="28" x2="18" y2="30"/><line x1="6" y1="18" x2="8" y2="18"/><line x1="28" y1="18" x2="30" y2="18"/></g><line x1="18" y1="18" x2="18" y2="9" stroke="black" stroke-width="2" stroke-linecap="round"/><line x1="18" y1="18" x2="25" y2="18" stroke="black" stroke-width="1.5" stroke-linecap="round"/><line x1="18" y1="18" x2="13" y2="24" stroke="#FF6B35" stroke-width="1" stroke-linecap="round"/><circle cx="18" cy="18" r="1.5" fill="#FF6B35"/></svg>',
+  calculator: '<svg viewBox="0 0 36 36" width="36" height="36"><rect x="9" y="6" width="18" height="5" rx="1" fill="#3A3A3C"/><text x="24" y="10" text-anchor="end" fill="white" font-size="4.5" font-family="DM Sans">0</text><g fill="#5A5A5A"><circle cx="12" cy="17" r="1.6"/><circle cx="17" cy="17" r="1.6"/><circle cx="22" cy="17" r="1.6"/></g><circle cx="27" cy="17" r="1.6" fill="#F5A623"/><g fill="#5A5A5A"><circle cx="12" cy="22" r="1.6"/><circle cx="17" cy="22" r="1.6"/><circle cx="22" cy="22" r="1.6"/></g><circle cx="27" cy="22" r="1.6" fill="#F5A623"/><g fill="#5A5A5A"><circle cx="12" cy="27" r="1.6"/><circle cx="17" cy="27" r="1.6"/><circle cx="22" cy="27" r="1.6"/></g><circle cx="27" cy="27" r="1.6" fill="#F5A623"/></svg>',
+  appstore: '<svg viewBox="0 0 36 36" width="36" height="36"><path d="M18 10 L11 26 L13.5 26 L15 22.5 L21 22.5 L22.5 26 L25 26 Z M16 20 L18 14.5 L20 20 Z" fill="white"/></svg>',
+  settings: '<svg viewBox="0 0 36 36" width="32" height="32"><g fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"><circle cx="18" cy="18" r="4"/><path d="M18 6 L19.5 9 L23 8 L24 11.5 L27.5 13 L26 16 L29 18 L26 20 L27.5 23 L24 24.5 L23 28 L19.5 27 L18 30 L16.5 27 L13 28 L12 24.5 L8.5 23 L10 20 L7 18 L10 16 L8.5 13 L12 11.5 L13 8 L16.5 9 Z"/></g></svg>',
+  wallet: '<svg viewBox="0 0 36 36" width="36" height="36"><rect x="6" y="22" width="24" height="7" rx="1.5" fill="#F5C8A8"/><rect x="6" y="15" width="24" height="7" rx="1.5" fill="#76A4D8"/><rect x="6" y="8" width="24" height="7" rx="1.5" fill="#FF6B6B"/></svg>',
+  health: '<svg viewBox="0 0 36 36" width="36" height="36"><path d="M18 28 L8 18 Q4 13 8 9 Q13 5 18 12 Q23 5 28 9 Q32 13 28 18 Z" fill="#FF3B5C"/></svg>',
+  files: '<svg viewBox="0 0 36 36" width="36" height="36"><path d="M6 11 L14 11 L16 14 L30 14 L30 27 L6 27 Z" fill="white"/></svg>',
+  mishwari: '<svg viewBox="0 0 60 60" width="44" height="44" xmlns="http://www.w3.org/2000/svg"><path d="M14 17 Q 22 36, 40 39" stroke="white" stroke-width="4" stroke-linecap="round" fill="none"/><circle cx="14" cy="17" r="5" fill="white"/><path d="M40 33 C 45 33, 47 36.5, 46 40 L 40 49 L 34 40 C 33 36.5, 35 33, 40 33 Z" fill="#F5C56C"/><circle cx="40" cy="38" r="2.6" fill="white"/></svg>',
+  phone: '<svg viewBox="0 0 32 32" width="30" height="30" fill="white"><path d="M22.5 19.5 L20.5 21.5 Q17.5 23 14 19.5 L12.5 18 Q9 14.5 10.5 11.5 L12.5 9.5 L16 13 L13.5 15.5 Q14 17.5 16.5 20 L19 17.5 Z"/></svg>',
+  safari: '<svg viewBox="0 0 36 36" width="34" height="34"><circle cx="18" cy="18" r="13" fill="#F2F2F2"/><circle cx="18" cy="18" r="13" fill="none" stroke="#1565C0" stroke-width="0.8"/><circle cx="18" cy="18" r="11" fill="none" stroke="#90CAF9" stroke-width="0.4"/><path d="M18 9 L21 18 L18 21 L15 18 Z" fill="#E53935"/><path d="M18 27 L15 18 L18 15 L21 18 Z" fill="white"/></svg>',
+  mailApp: '<svg viewBox="0 0 36 36" width="34" height="34"><rect x="6" y="11" width="24" height="14" rx="2" fill="white"/><path d="M6 13 L18 19 L30 13" fill="none" stroke="#1976D2" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+  music: '<svg viewBox="0 0 32 32" width="32" height="32" fill="white"><path d="M22 6 L22 20 Q22 23.5 18 23.5 Q14 23.5 14 20.5 Q14 17.5 18 17.5 L20 17.5 L20 9 L13 11 L13 23 Q13 26.5 9 26.5 Q5 26.5 5 23.5 Q5 20.5 9 20.5 L11 20.5 L11 9 Z"/></svg>',
+};
+
+function renderHomescreen() {
+  const now = liveData.now;
+  const weekday = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const monthDay = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+  const fs = liveData.nextTrains['One Ninety'];
+
+  // Classic colorful iOS app icons — each app has its brand color background.
+  // High contrast against the dark wallpaper. Mishwari uses its own brand gradient.
+  const apps = [
+    { name: 'Messages',   bg: 'linear-gradient(180deg, #5BE25B 0%, #18C636 100%)', svg: appSvg.messages, badge: '3' },
+    { name: 'Calendar',   bg: 'white', svg: appSvg.calendar },
+    { name: 'Photos',     bg: 'white', svg: appSvg.photos },
+    { name: 'Camera',     bg: 'linear-gradient(180deg, #9E9E9E 0%, #2A2A2A 100%)', svg: appSvg.camera },
+    { name: 'Maps',       bg: 'linear-gradient(180deg, #E8F5DC 0%, #C5E0B5 100%)', svg: appSvg.maps },
+    { name: 'Weather',    bg: 'linear-gradient(180deg, #5099E0 0%, #1057A6 100%)', svg: appSvg.weather },
+    { name: 'Clock',      bg: '#1A1A1A', svg: appSvg.clock },
+    { name: 'Notes',      bg: 'linear-gradient(180deg, #FFF1B8 0%, #F5C84B 100%)', svg: appSvg.notes },
+    { name: 'App Store',  bg: 'linear-gradient(180deg, #45A4F5 0%, #006FCC 100%)', svg: appSvg.appstore, badge: '12' },
+    { name: 'Wallet',     bg: '#1A1A1A', svg: appSvg.wallet },
+    { name: 'Health',     bg: 'white', svg: appSvg.health },
+    { name: 'Settings',   bg: 'linear-gradient(180deg, #C0C0C0 0%, #5E5E5E 100%)', svg: appSvg.settings, badge: '1' },
+    { name: 'Reminders',  bg: 'white', svg: appSvg.reminders },
+    { name: 'Calculator', bg: '#1A1A1A', svg: appSvg.calculator },
+    { name: 'Files',      bg: 'linear-gradient(180deg, #6CB7E0 0%, #1F77B4 100%)', svg: appSvg.files },
+    { name: 'Mishwari',   bg: 'linear-gradient(135deg, #073642 0%, #0E4C5C 50%, #C8923C 100%)', svg: appSvg.mishwari, onclick: 'launchMishwari()' },
+  ];
+
+  const dock = [
+    { name: 'Phone',  bg: 'linear-gradient(180deg, #4DDB7C 0%, #18B14D 100%)', svg: appSvg.phone },
+    { name: 'Safari', bg: 'linear-gradient(180deg, #C8E6FA 0%, #4FA0E5 100%)', svg: appSvg.safari },
+    { name: 'Mail',   bg: 'linear-gradient(180deg, #88D0FF 0%, #1075CA 100%)', svg: appSvg.mailApp, badge: '24' },
+    { name: 'Music',  bg: 'linear-gradient(180deg, #FB6B96 0%, #FB2F45 100%)', svg: appSvg.music },
+  ];
+
+  return `
+    <div class="screen" style="position:absolute; inset:0">
+      <div class="homescreen-bg"></div>
+      <div class="relative h-full flex flex-col" style="color:white">
+
+        <!-- Status bar (light over dark wallpaper) -->
+        <div class="status-bar" style="color:white">
+          <span data-live="clock">${formatTime(now)}</span>
+          <div class="flex items-center gap-1.5">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="9" width="3" height="3" rx="0.5"/><rect x="5" y="6" width="3" height="6" rx="0.5"/><rect x="10" y="3" width="3" height="9" rx="0.5"/><rect x="15" y="0" width="3" height="12" rx="0.5"/></svg>
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5c2-2 5-3 7-3s5 1 7 3"/><path d="M5 7c1-1 2.5-1.5 4-1.5s3 .5 4 1.5"/><path d="M8 9c.5-.5 1-1 2-1s1.5.5 2 1"/></svg>
+            <svg width="26" height="12" viewBox="0 0 26 12" fill="none" stroke="currentColor" stroke-width="1"><rect x="0.5" y="0.5" width="22" height="11" rx="2.5"/><rect x="24" y="4" width="2" height="4" rx="1" fill="currentColor"/><rect x="2" y="2" width="18" height="8" rx="1.5" fill="currentColor"/></svg>
+          </div>
+        </div>
+
+        <!-- Date line (small, iOS lock-style) -->
+        <div class="text-center mt-1 mb-4" style="text-shadow:0 1px 6px rgba(0,0,0,0.3)">
+          <p class="text-[11px] font-semibold tracking-wider uppercase" style="opacity:0.85">${weekday}, ${monthDay}</p>
+        </div>
+
+        <!-- App grid with Mishwari widget -->
+        <div class="flex-1 px-4 grid grid-cols-4 gap-y-3 gap-x-3 content-start" style="grid-auto-rows: 72px">
+
+          <!-- Mishwari live widget (2x2) -->
+          <div onclick="launchMishwari()" class="widget-mishwari tap">
+            <!-- Header -->
+            <div class="flex items-center gap-1.5 relative" style="z-index:1">
+              <div style="width:20px; height:20px; border-radius:5px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center">
+                <svg viewBox="0 0 24 24" width="13" height="13" xmlns="http://www.w3.org/2000/svg"><path d="M6 7 Q 9 14, 17 16" stroke="white" stroke-width="2.5" stroke-linecap="round" fill="none"/><circle cx="6" cy="7" r="2.4" fill="white"/><circle cx="17" cy="16" r="3" fill="#F5C56C"/></svg>
+              </div>
+              <span style="font-size:9px; font-weight:700; letter-spacing:0.1em; opacity:0.9">MISHWARI</span>
+              <span class="ml-auto w-1.5 h-1.5 rounded-full blink" style="background:#7AE8B0"></span>
+            </div>
+
+            <!-- Live time -->
+            <div class="relative mt-3" style="z-index:1">
+              <p style="font-family:Fraunces, serif; font-size:36px; font-weight:500; line-height:1; letter-spacing:-0.02em" data-live-station="One Ninety">${fs.mins}:${String(fs.secs).padStart(2,'0')}</p>
+              <p style="font-size:8.5px; font-weight:700; letter-spacing:0.12em; opacity:0.7; margin-top:4px">TIL NEXT MONORAIL</p>
+            </div>
+
+            <!-- Route footer -->
+            <div class="absolute left-3.5 right-3.5 flex items-center gap-1.5" style="bottom:11px; z-index:1">
+              <span class="rounded-full flex items-center justify-center font-mono font-bold" style="width:14px; height:14px; background:#8E44AD; font-size:8px; line-height:1">4</span>
+              <span style="font-size:10px; font-weight:600; opacity:0.95">One Ninety · Justice City</span>
+            </div>
+          </div>
+
+          ${apps.map(appTile).join('')}
+        </div>
+
+        <!-- iOS search pill (16+) -->
+        <div class="flex justify-center px-4">
+          <button onclick="noDemo()" class="search-pill tap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <span>Search</span>
+          </button>
+        </div>
+
+        <!-- Dock -->
+        <div class="app-dock">
+          ${dock.map(appTile).join('')}
+        </div>
+
+        <!-- Home indicator (visual only — we are home) -->
+        <div class="absolute left-1/2 -translate-x-1/2" style="bottom:6px; width:140px; height:5px; border-radius:2.5px; background:rgba(255,255,255,0.7)"></div>
+      </div>
+    </div>
+  `;
+}
+
+// ============== SCREEN: SPLASH ==============
+function renderSplash() {
+  return `
+    <div class="screen" style="position:absolute; inset:0">
+      <div class="splash-bg"></div>
+      <div class="relative h-full flex flex-col items-center justify-center" style="color:white">
+        <div class="splash-logo mb-5" style="width:108px; height:108px; border-radius:24px; background:white; display:flex; align-items:center; justify-content:center; box-shadow:0 25px 50px rgba(0,0,0,0.35)">
+          <svg viewBox="0 0 60 60" width="74" height="74" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14 17 Q 22 36, 40 39" stroke="#073642" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <circle cx="14" cy="17" r="5.5" fill="#073642"/>
+            <path d="M40 33 C 45 33, 47 36.5, 46 40 L 40 49 L 34 40 C 33 36.5, 35 33, 40 33 Z" fill="#C8923C"/>
+            <circle cx="40" cy="38" r="2.8" fill="white"/>
+          </svg>
+        </div>
+        <div class="splash-text text-center">
+          <p class="font-display font-medium tracking-tight" style="font-size:38px; letter-spacing:-0.01em">Mishwari</p>
+          <p class="font-arabic mt-0.5" style="font-size:18px; opacity:0.85">مشواري</p>
+          <p class="text-[10px] uppercase tracking-widest mt-4" style="opacity:0.65">Egypt's mobility companion</p>
+        </div>
+        <div class="absolute flex items-center gap-2" style="bottom:96px">
+          <span class="w-1.5 h-1.5 rounded-full blink" style="background:white"></span>
+          <span class="w-1.5 h-1.5 rounded-full blink" style="background:white; animation-delay:0.2s"></span>
+          <span class="w-1.5 h-1.5 rounded-full blink" style="background:white; animation-delay:0.4s"></span>
+        </div>
+        <p class="absolute text-[9px] uppercase tracking-widest" style="bottom:36px; opacity:0.55">Powered by Ministry of Transportation</p>
+      </div>
+    </div>
+  `;
+}
+
+// ============== SCREEN: NETWORK (Metro map) ==============
+function renderNetwork() {
+  const L = t[state.lang];
+  const stations = [
+    // Line 1 terminals + key
+    { en: 'El-Marg', ar: 'المرج', x: 250, y: 30, line: 1, big: true },
+    { en: 'Maadi', ar: 'المعادي', x: 230, y: 290, line: 1 },
+    { en: 'Helwan', ar: 'حلوان', x: 250, y: 360, line: 1, big: true },
+    // Line 2 terminals + key
+    { en: 'Shubra', ar: 'شبرا', x: 130, y: 30, line: 2, big: true },
+    { en: 'Dokki', ar: 'الدقي', x: 130, y: 250, line: 2 },
+    { en: 'El-Mounib', ar: 'المنيب', x: 130, y: 360, line: 2, big: true },
+    // Line 3 terminals
+    { en: 'Adly Mansour', ar: 'عدلي منصور', x: 300, y: 80, line: 3, big: true },
+    { en: 'Kit Kat', ar: 'كيت كات', x: 40, y: 150, line: 3, big: true },
+    // Interchanges
+    { en: 'Sadat', ar: 'السادات', x: 180, y: 200, interchange: [1, 2], big: true },
+    { en: 'Nasser', ar: 'جمال عبد الناصر', x: 220, y: 150, interchange: [1, 3], big: true },
+    { en: 'Attaba', ar: 'العتبة', x: 130, y: 150, interchange: [2, 3], big: true },
+  ];
+  
+  const lineInfo = [
+    { n: 1, color: 'var(--line-1)', name: state.lang==='ar' ? 'حلوان ↔ المرج' : 'Helwan ↔ El-Marg', stations: 35, status: 'ok' },
+    { n: 2, color: 'var(--line-2)', name: state.lang==='ar' ? 'شبرا ↔ المنيب' : 'Shubra ↔ El-Mounib', stations: 20, status: 'delay' },
+    { n: 3, color: 'var(--line-3)', name: state.lang==='ar' ? 'عدلي منصور ↔ كيت كات' : 'Adly Mansour ↔ Kit Kat', stations: 23, status: 'ok' },
+    { n: 4, color: 'var(--line-4)', name: state.lang==='ar' ? 'مونوريل · المشير ↔ مدينة العدالة' : 'Monorail · Musheer ↔ Justice City', stations: 16, status: 'partial', sampleStation: 'Musheer Tantawi' },
+    { n: 5, color: 'var(--line-5)', name: state.lang==='ar' ? 'مونوريل · أكتوبر ↔ وادي النيل' : 'Monorail · 6th October ↔ Wadi El-Nile', stations: 12, status: 'construction' },
+  ];
+
+  return html`
+    <div class="screen ${fontClass()}" dir="${langDir()}">
+      ${statusBar()}
+      <div class="px-6 pt-2 pb-32">
+        <div class="flex items-start justify-between mb-5 rise rise-d1">
+          <div>
+            <h1 class="font-display text-3xl font-medium leading-tight">${state.lang==='ar' ? 'الشبكة' : 'Network'}</h1>
+            <p class="text-xs mt-1" style="color:var(--ink-soft)">${state.lang==='ar' ? 'مترو القاهرة · 3 خطوط' : 'Cairo Metro · 3 lines'}</p>
+          </div>
+          <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full" style="background:var(--nile-soft)">
+            <span class="w-1.5 h-1.5 rounded-full pulse-dot" style="background:var(--green)"></span>
+            <span class="text-[10px] font-mono uppercase font-bold" style="color:var(--green)">Live</span>
+          </div>
+        </div>
+
+        <!-- Map card -->
+        <div class="card p-3 mb-5 rise rise-d2" style="overflow:hidden">
+          <div class="map-bg relative rounded-xl" style="height:380px">
+            <svg viewBox="0 0 340 400" class="w-full h-full" style="overflow:visible">
+              <!-- Line 1 (red): El-Marg → Nasser → Sadat → Maadi → Helwan -->
+              <path id="line1-path" d="M250 30 L250 100 L220 150 L180 200 L230 290 L250 360" 
+                    stroke="var(--line-1)" stroke-width="5" fill="none" 
+                    stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+              
+              <!-- Line 2 (yellow): Shubra → Attaba → Sadat → Dokki → El-Mounib -->
+              <path id="line2-path" d="M130 30 L130 150 L180 200 L130 250 L130 360" 
+                    stroke="var(--line-2)" stroke-width="5" fill="none" 
+                    stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+              
+              <!-- Line 3 (green): Kit Kat → Attaba → Nasser → Adly Mansour -->
+              <path id="line3-path" d="M40 150 L130 150 L220 150 L300 80" 
+                    stroke="var(--line-3)" stroke-width="5" fill="none" 
+                    stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+
+              <!-- Animated trains -->
+              <circle r="5" fill="var(--line-1)" stroke="white" stroke-width="2">
+                <animateMotion dur="18s" repeatCount="indefinite" rotate="auto">
+                  <mpath href="#line1-path"/>
+                </animateMotion>
+              </circle>
+              <circle r="5" fill="var(--line-1)" stroke="white" stroke-width="2">
+                <animateMotion dur="18s" repeatCount="indefinite" rotate="auto" begin="-9s" keyPoints="1;0" keyTimes="0;1" calcMode="linear">
+                  <mpath href="#line1-path"/>
+                </animateMotion>
+              </circle>
+              <circle r="5" fill="var(--line-2)" stroke="white" stroke-width="2">
+                <animateMotion dur="22s" repeatCount="indefinite" rotate="auto">
+                  <mpath href="#line2-path"/>
+                </animateMotion>
+              </circle>
+              <circle r="5" fill="var(--line-2)" stroke="white" stroke-width="2">
+                <animateMotion dur="22s" repeatCount="indefinite" rotate="auto" begin="-11s" keyPoints="1;0" keyTimes="0;1" calcMode="linear">
+                  <mpath href="#line2-path"/>
+                </animateMotion>
+              </circle>
+              <circle r="5" fill="var(--line-3)" stroke="white" stroke-width="2">
+                <animateMotion dur="16s" repeatCount="indefinite" rotate="auto">
+                  <mpath href="#line3-path"/>
+                </animateMotion>
+              </circle>
+              <circle r="5" fill="var(--line-3)" stroke="white" stroke-width="2">
+                <animateMotion dur="16s" repeatCount="indefinite" rotate="auto" begin="-8s" keyPoints="1;0" keyTimes="0;1" calcMode="linear">
+                  <mpath href="#line3-path"/>
+                </animateMotion>
+              </circle>
+
+              <!-- Stations -->
+              ${stations.map(s => {
+                const isInterchange = !!s.interchange;
+                const r = s.big ? 7 : 5;
+                if (isInterchange) {
+                  return `
+                    <g onclick="tapStation('${s.en}','${s.ar}')" style="cursor:pointer">
+                      <circle cx="${s.x}" cy="${s.y}" r="10" fill="white" stroke="var(--ink)" stroke-width="2"/>
+                      <circle cx="${s.x-2.5}" cy="${s.y}" r="3" fill="var(--line-${s.interchange[0]})"/>
+                      <circle cx="${s.x+2.5}" cy="${s.y}" r="3" fill="var(--line-${s.interchange[1]})"/>
+                    </g>
+                  `;
+                }
+                return `
+                  <g onclick="tapStation('${s.en}','${s.ar}')" style="cursor:pointer">
+                    <circle cx="${s.x}" cy="${s.y}" r="${r}" fill="white" stroke="var(--line-${s.line})" stroke-width="2.5"/>
+                  </g>
+                `;
+              }).join('')}
+
+              <!-- Labels (only for major stations) -->
+              ${stations.filter(s => s.big).map(s => {
+                // Position label based on station location
+                const onLeftSide = s.x < 170;
+                const onTop = s.y < 80;
+                const onBottom = s.y > 320;
+                let tx = s.x + (onLeftSide ? -14 : 14);
+                let ty = s.y + (onTop ? -8 : onBottom ? 22 : 4);
+                const anchor = onLeftSide ? 'end' : 'start';
+                const label = state.lang==='ar' ? s.ar : s.en;
+                return `
+                  <text x="${tx}" y="${ty}" text-anchor="${anchor}" 
+                        style="font-family: 'DM Sans'; font-size: 10px; font-weight: 600; fill: var(--ink)">${label}</text>
+                `;
+              }).join('')}
+
+              <!-- Line labels (small) -->
+              <g style="font-family: 'JetBrains Mono'; font-size: 9px; font-weight: 700">
+                <circle cx="265" cy="220" r="9" fill="var(--line-1)"/>
+                <text x="265" y="223.5" text-anchor="middle" fill="white">1</text>
+                <circle cx="105" cy="305" r="9" fill="var(--line-2)"/>
+                <text x="105" y="308.5" text-anchor="middle" fill="white">2</text>
+                <circle cx="80" cy="138" r="9" fill="var(--line-3)"/>
+                <text x="80" y="141.5" text-anchor="middle" fill="white">3</text>
+              </g>
+            </svg>
+          </div>
+          <p class="text-[10px] text-center mt-2" style="color:var(--ink-faint)">${state.lang==='ar' ? 'اضغط على محطة لتخطيط رحلة' : 'Tap a station to plan a trip'}</p>
+        </div>
+
+        <!-- Line summary cards -->
+        <p class="text-xs uppercase tracking-widest font-semibold mb-3 rise rise-d3" style="color:var(--ink-faint)">${state.lang==='ar' ? 'الخطوط' : 'Lines'}</p>
+        <div class="space-y-2 rise rise-d3">
+          ${lineInfo.map(l => {
+            const station = l.sampleStation || (l.n === 1 ? 'Maadi' : l.n === 2 ? 'Dokki' : l.n === 3 ? 'Nasser' : null);
+            const t = station ? liveData.nextTrains[station] : null;
+            const statusColor = l.status === 'ok' ? 'var(--green)' : l.status === 'construction' ? 'var(--ink-faint)' : 'var(--gold)';
+            const statusText = l.status === 'ok' ? L.operational
+                            : l.status === 'delay' ? L.minorDelay
+                            : l.status === 'partial' ? L.partialService
+                            : L.underConstruction;
+            return `
+            <div onclick="openModal('notifications')" class="tap card p-3 flex items-center gap-3" style="${l.status === 'construction' ? 'opacity:0.65' : ''}">
+              <span style="background:${l.color}" class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold font-mono text-sm flex-shrink-0">${l.n}</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate" style="color:var(--ink)">${l.name}</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[10px]" style="color:${statusColor}">● ${statusText}</span>
+                  <span class="text-[10px]" style="color:var(--ink-faint)">${l.stations} ${state.lang==='ar' ? 'محطة' : 'stations'}</span>
+                </div>
+              </div>
+              ${t ? `
+                <div class="text-right flex-shrink-0">
+                  <p class="text-[9px] uppercase tracking-wider font-bold" style="color:var(--ink-faint)">${state.lang==='ar' ? 'التالي' : 'Next'}</p>
+                  <p class="font-mono text-sm font-semibold" style="color:var(--ink)" data-live-station="${station}">${t.mins}:${String(t.secs).padStart(2,'0')}</p>
+                </div>` : `
+                <div class="text-right flex-shrink-0">
+                  <p class="text-[9px] uppercase tracking-wider font-bold" style="color:var(--ink-faint)">${state.lang==='ar' ? '2026' : '2026'}</p>
+                  <p class="font-mono text-sm font-semibold" style="color:var(--ink-faint)">—:—</p>
+                </div>`}
+            </div>
+          `}).join('')}
+        </div>
+
+        <!-- Bus, rail, monorail card -->
+        <p class="text-xs uppercase tracking-widest font-semibold mt-5 mb-3 rise rise-d4" style="color:var(--ink-faint)">${state.lang==='ar' ? 'وسائل أخرى' : 'Other modes'}</p>
+        <div class="grid grid-cols-3 gap-2 rise rise-d4">
+          <div onclick="openModal('cta-bus')" class="tap card p-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style="background:var(--gold-soft); color:var(--gold)">${ic('bus','w-4 h-4')}</div>
+            <p class="text-sm font-semibold" style="color:var(--ink)">CTA ${state.lang==='ar' ? 'أتوبيس' : 'Bus'}</p>
+            <p class="text-[10px]" style="color:var(--ink-faint)">340+ ${state.lang==='ar' ? 'خط' : 'routes'}</p>
+          </div>
+          <div onclick="openModal('monorail')" class="tap card p-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style="background:#EBDCF1; color:var(--line-4)">${ic('monorail','w-4 h-4')}</div>
+            <p class="text-sm font-semibold" style="color:var(--ink)">${state.lang==='ar' ? 'مونوريل' : 'Monorail'}</p>
+            <p class="text-[10px]" style="color:var(--ink-faint)">16 ${state.lang==='ar' ? 'محطة' : 'stations'}</p>
+          </div>
+          <div onclick="openModal('enr-rail')" class="tap card p-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style="background:#EFE6DC; color:var(--line-6)">${ic('train','w-4 h-4')}</div>
+            <p class="text-sm font-semibold" style="color:var(--ink)">ENR ${state.lang==='ar' ? 'القطار' : 'Rail'}</p>
+            <p class="text-[10px]" style="color:var(--ink-faint)">${state.lang==='ar' ? 'بين المحافظات' : 'Intercity'}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    ${bottomNav('network')}
+  `;
+}
+
+// ============== BOTTOM NAV ==============
+function bottomNav(active) {
+  const L = t[state.lang];
+  return `
+    <div class="bottom-nav ${fontClass()}">
+      <div onclick="go('home')" class="nav-item ${active === 'home' ? 'active' : ''}">
+        <div class="nav-icon">${icons.home}</div>
+        <span class="nav-label">${L.tabs.home}</span>
+      </div>
+      <div onclick="go('ticket')" class="nav-item ${active === 'ticket' ? 'active' : ''}">
+        <div class="nav-icon">${icons.ticket}</div>
+        <span class="nav-label">${L.tabs.tickets}</span>
+      </div>
+      <div onclick="go('network')" class="nav-item ${active === 'network' ? 'active' : ''}">
+        <div class="nav-icon">${icons.map}</div>
+        <span class="nav-label">${L.tabs.map}</span>
+      </div>
+      <div onclick="go('profile')" class="nav-item ${active === 'profile' ? 'active' : ''}">
+        <div class="nav-icon">${icons.user}</div>
+        <span class="nav-label">${L.tabs.profile}</span>
+      </div>
+    </div>
+    <button onclick="go('homescreen')" class="home-pill tap" aria-label="Return to home screen"></button>
+  `;
+}
+
+// ============== MODALS ==============
+function renderModal() {
+  if (!state.modal) return '';
+  let inner = '';
+  if (state.modal === 'notifications') inner = modalNotifications();
+  else if (state.modal === 'timepicker') inner = modalTimePicker();
+  else if (state.modal === 'locationpicker') inner = modalLocationPicker();
+  else if (state.modal === 'cta-bus') inner = modalCtaBus();
+  else if (state.modal === 'enr-rail') inner = modalEnrRail();
+  else if (state.modal === 'monorail') inner = modalMonorail();
+  return `
+    <div class="modal-overlay" onclick="closeModal()">
+      <div class="modal-sheet ${fontClass()}" onclick="event.stopPropagation()" dir="${langDir()}">
+        <div class="modal-grabber"></div>
+        ${inner}
+      </div>
+    </div>
+  `;
+}
+
+function modalNotifications() {
+  const title = state.lang === 'ar' ? 'الإشعارات' : 'Notifications';
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-medium">${title}</h3>
+      <button onclick="closeModal()" class="tap w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--bg-card); color:var(--ink-soft); border:1px solid var(--line)">${ic('x','w-4 h-4')}</button>
+    </div>
+    <div class="space-y-2">
+      ${liveData.alerts.map(a => `
+        <div class="card p-3 flex gap-3" style="border-left:3px solid ${a.lineColor}">
+          <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background:${a.lineColor}; color:white">${ic(a.icon, 'w-4 h-4')}</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold" style="color:var(--ink)">${a.title[state.lang]}</p>
+            <p class="text-xs mt-0.5 leading-snug" style="color:var(--ink-soft)">${a.body[state.lang]}</p>
+            <p class="text-[10px] mt-1.5 font-mono" style="color:var(--ink-faint)">${a.time[state.lang]}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function modalMonorail() {
+  const L = t[state.lang];
+  const eastStations = [
+    { en: 'Musheer Tantawi',   ar: 'المشير طنطاوي',       liveKey: 'Musheer Tantawi',   tag: state.lang==='ar' ? 'بداية الخط' : 'Start of line' },
+    { en: 'One Ninety',         ar: 'وان ناينتي' },
+    { en: 'Air Hospital',       ar: 'مستشفى القوات الجوية' },
+    { en: 'Al-Narges',          ar: 'النرجس' },
+    { en: 'Investors',          ar: 'المستثمرين' },
+    { en: 'Lotus',              ar: 'اللوتس',              liveKey: 'Lotus' },
+    { en: 'Golden Square',      ar: 'الميدان الذهبي' },
+    { en: 'Beit Al-Watan',      ar: 'بيت الوطن' },
+    { en: 'Al-Fattah Mosque',   ar: 'مسجد الفتاح العليم' },
+    { en: 'R1 District',        ar: 'حي R1' },
+    { en: 'R2 District',        ar: 'حي R2' },
+    { en: 'Business District',  ar: 'الحي المالي',         liveKey: 'Business District' },
+    { en: 'Arts & Culture',     ar: 'مدينة الفنون' },
+    { en: 'Government District',ar: 'الحي الحكومي' },
+    { en: 'Misr Mosque',        ar: 'مسجد مصر' },
+    { en: 'Justice City',       ar: 'مدينة العدالة',      liveKey: 'Justice City',      tag: state.lang==='ar' ? 'نهاية الخط' : 'End of line' },
+  ];
+
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-display text-xl font-medium" style="color:var(--ink)">${state.lang==='ar' ? 'مونوريل القاهرة' : 'Cairo Monorail'}</h3>
+        <p class="text-xs mt-0.5" style="color:var(--ink-soft)">${state.lang==='ar' ? '16 من 22 محطة تعمل · 56.5 كم' : '16 of 22 stations operational · 56.5 km'}</p>
+      </div>
+      <button onclick="closeModal()" class="tap w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--bg-card); color:var(--ink-soft); border:1px solid var(--line)">${ic('x','w-4 h-4')}</button>
+    </div>
+
+    <!-- Status banner -->
+    <div class="p-3 mb-3 rounded-2xl" style="background:linear-gradient(135deg, var(--line-4) 0%, #6E2D8E 100%); color:white">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="w-7 h-7 rounded-lg flex items-center justify-center" style="background:rgba(255,255,255,0.18)">${ic('monorail','w-4 h-4')}</div>
+        <div class="flex-1">
+          <p class="text-[9px] font-bold uppercase tracking-widest" style="opacity:0.8">${state.lang==='ar' ? 'يعمل منذ' : 'Operational since'}</p>
+          <p class="text-sm font-semibold">${state.lang==='ar' ? '6 مايو 2026' : 'May 6, 2026'}</p>
+        </div>
+        <span class="text-[9px] font-mono font-bold px-2 py-1 rounded flex items-center gap-1" style="background:rgba(255,255,255,0.22)">
+          <span class="w-1 h-1 rounded-full blink" style="background:white"></span>
+          LIVE
+        </span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 pt-2" style="border-top:1px solid rgba(255,255,255,0.15)">
+        <div>
+          <p class="text-[9px] uppercase font-bold tracking-wider" style="opacity:0.7">${state.lang==='ar' ? 'السرعة' : 'Speed'}</p>
+          <p class="text-sm font-mono font-semibold">80 km/h</p>
+        </div>
+        <div>
+          <p class="text-[9px] uppercase font-bold tracking-wider" style="opacity:0.7">${state.lang==='ar' ? 'المدة' : 'End-to-end'}</p>
+          <p class="text-sm font-mono font-semibold">~60 min</p>
+        </div>
+        <div>
+          <p class="text-[9px] uppercase font-bold tracking-wider" style="opacity:0.7">${state.lang==='ar' ? 'النوع' : 'System'}</p>
+          <p class="text-sm font-mono font-semibold">${state.lang==='ar' ? 'بدون سائق' : 'Driverless'}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- East Line section -->
+    <div class="flex items-center gap-2 mb-3">
+      <span class="font-mono font-bold text-[10px] px-2 py-1 rounded-full" style="background:var(--line-4); color:white">${state.lang==='ar' ? 'الخط 4 · الشرق' : 'LINE 4 · EAST'}</span>
+      <span class="text-[11px] font-medium" style="color:var(--ink-soft)">Musheer Tantawi ↔ Justice City</span>
+    </div>
+
+    <!-- Station timeline -->
+    <div class="card overflow-hidden mb-4">
+      ${eastStations.map((s, i) => {
+        const live = s.liveKey ? liveData.nextTrains[s.liveKey] : null;
+        const isLast = i === eastStations.length - 1;
+        return `
+          <div class="flex items-stretch gap-3 px-4 py-2.5 ${isLast ? '' : 'relative'}">
+            <!-- Line + dot column -->
+            <div class="relative flex-shrink-0" style="width:14px">
+              <div style="position:absolute; top:0; bottom:${isLast ? '50%' : '0'}; left:50%; width:3px; transform:translateX(-50%); background:var(--line-4); ${i === 0 ? 'top:50%;' : ''}"></div>
+              <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:12px; height:12px; border-radius:50%; background:white; border:3px solid var(--line-4); box-shadow:0 1px 3px rgba(0,0,0,0.1); z-index:1"></div>
+            </div>
+            <!-- Station name + tag -->
+            <div class="flex-1 min-w-0 py-1">
+              <p class="text-sm font-medium" style="color:var(--ink)">${state.lang==='ar' ? s.ar : s.en}</p>
+              ${s.tag ? `<p class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--line-4)">${s.tag}</p>` : ''}
+            </div>
+            <!-- Live arrival -->
+            ${live ? `
+              <div class="text-right flex-shrink-0 py-1">
+                <p class="text-[8px] uppercase font-bold tracking-wider flex items-center gap-1 justify-end" style="color:var(--green)">
+                  <span class="w-1 h-1 rounded-full blink" style="background:var(--green)"></span>
+                  ${state.lang==='ar' ? 'مباشر' : 'Live'}
+                </p>
+                <p class="font-mono text-sm font-semibold" style="color:var(--ink)" data-live-station="${s.liveKey}">${live.mins}:${String(live.secs).padStart(2,'0')}</p>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <!-- West Line section (under construction) -->
+    <div class="card p-3 mb-4" style="opacity:0.7; background:var(--bg-card)">
+      <div class="flex items-center gap-2 mb-1.5">
+        <span class="font-mono font-bold text-[10px] px-2 py-1 rounded-full" style="background:var(--line-5); color:white">${state.lang==='ar' ? 'الخط 5 · الغرب' : 'LINE 5 · WEST'}</span>
+        <span class="text-[10px] font-semibold uppercase tracking-wider" style="color:var(--ink-faint)">${state.lang==='ar' ? 'قيد الإنشاء' : 'Under construction'}</span>
+      </div>
+      <p class="text-sm font-medium" style="color:var(--ink)">6th October ↔ Wadi El-Nile</p>
+      <p class="text-[11px]" style="color:var(--ink-faint)">${state.lang==='ar' ? '42 كم · 12 محطة · متوقع نهاية 2026' : '42 km · 12 stations · Projected late 2026'}</p>
+    </div>
+
+    <!-- Fare structure (real announced fares) -->
+    <p class="text-[10px] uppercase tracking-widest font-semibold mb-2 ml-1" style="color:var(--ink-faint)">${state.lang==='ar' ? 'الأجرة الرسمية' : 'Official fares'}</p>
+    <div class="card p-3 mb-1">
+      ${[
+        { range: state.lang==='ar' ? '1-5 محطات' : '1-5 stations', price: 20 },
+        { range: state.lang==='ar' ? '6-10 محطات' : '6-10 stations', price: 40 },
+        { range: state.lang==='ar' ? '11-15 محطة' : '11-15 stations', price: 55 },
+        { range: state.lang==='ar' ? 'الخط الكامل' : 'Full line', price: 80 },
+      ].map((f, i, a) => `
+        <div class="flex items-center justify-between ${i < a.length - 1 ? 'pb-2 mb-2 border-b' : ''}" style="border-color:var(--line)">
+          <span class="text-xs" style="color:var(--ink-soft)">${f.range}</span>
+          <span class="font-mono font-semibold text-sm" style="color:var(--ink)">${f.price} ${L.egp}</span>
+        </div>
+      `).join('')}
+    </div>
+    <p class="text-[10px] mb-4" style="color:var(--ink-faint)">${state.lang==='ar' ? 'خصم 50% لكبار السن (+60) وذوي الإعاقة' : '50% discount for seniors 60+ and people with disabilities'}</p>
+
+    <button onclick="closeModal(); state.trip = {from:'Fifth Settlement', fromAr:'التجمع الخامس', to:'Justice City', toAr:'مدينة العدالة'}; state.routesKey=null; go('plan')" class="tap w-full py-3 rounded-2xl text-sm font-semibold" style="background:var(--ink); color:var(--bg-warm)">${state.lang==='ar' ? 'خطط رحلة بالمونوريل' : 'Plan a monorail trip'}</button>
+  `;
+}
+
+function modalCtaBus() {
+  const title = state.lang === 'ar' ? 'خطوط CTA للأتوبيس' : 'CTA Bus Routes';
+  const subtitle = state.lang === 'ar' ? '340+ خط متصل بشبكة المترو' : '340+ routes integrated with Metro';
+  const routes = [
+    { line: '951', en: 'Tagamoa ↔ Tahrir',         ar: 'التجمع ↔ التحرير',       mins: 4,  secs: 12, ok: true,  freq: '6 min' },
+    { line: '178', en: 'New Cairo ↔ GUC',           ar: 'القاهرة الجديدة ↔ الجامعة الألمانية', mins: 8,  secs: 5,  ok: true,  freq: '10 min' },
+    { line: 'AIR', en: 'Adly Mansour ↔ Airport',    ar: 'عدلي منصور ↔ المطار',     mins: 12, secs: 30, ok: true,  freq: '15 min' },
+    { line: '174', en: 'Maadi ↔ Tahrir',            ar: 'المعادي ↔ التحرير',       mins: 2,  secs: 45, ok: false, freq: '8 min', delay: true },
+    { line: '300', en: 'Heliopolis ↔ Downtown',     ar: 'مصر الجديدة ↔ وسط البلد', mins: 6,  secs: 20, ok: true,  freq: '12 min' },
+    { line: 'E15', en: 'Nasr City ↔ Dokki',         ar: 'مدينة نصر ↔ الدقي',       mins: 9,  secs: 0,  ok: true,  freq: '10 min' },
+  ];
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-display text-xl font-medium" style="color:var(--ink)">${title}</h3>
+        <p class="text-xs mt-0.5" style="color:var(--ink-soft)">${subtitle}</p>
+      </div>
+      <button onclick="closeModal()" class="tap w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--bg-card); color:var(--ink-soft); border:1px solid var(--line)">${ic('x','w-4 h-4')}</button>
+    </div>
+    <div class="card-warm p-3 mb-3 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--gold); color:white">${ic('bus','w-5 h-5')}</div>
+      <div class="flex-1">
+        <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--ink-soft)">${state.lang==='ar' ? 'الحالة الحالية' : 'Current status'}</p>
+        <p class="text-sm font-semibold" style="color:var(--green)">● ${state.lang==='ar' ? 'الشبكة تعمل' : 'Network operational'}</p>
+      </div>
+      <span class="text-[9px] font-mono font-bold px-2 py-1 rounded flex items-center gap-1" style="background:var(--green); color:white">
+        <span class="w-1 h-1 rounded-full blink" style="background:white"></span>
+        LIVE
+      </span>
+    </div>
+    <p class="text-[10px] uppercase tracking-widest font-semibold mb-2 ml-1" style="color:var(--ink-faint)">${state.lang==='ar' ? 'الخطوط الشائعة قرب موقعك' : 'Popular routes near you'}</p>
+    <div class="space-y-1.5">
+      ${routes.map(r => `
+        <div class="card p-3 flex items-center gap-3">
+          <span class="font-mono font-bold text-[10px] px-2 py-1 rounded flex-shrink-0" style="background:var(--gold); color:white; min-width:38px; text-align:center">${r.line}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium truncate" style="color:var(--ink)">${state.lang==='ar' ? r.ar : r.en}</p>
+            <p class="text-[10px]" style="color:${r.delay ? 'var(--gold)' : 'var(--ink-faint)'}">
+              ${r.delay ? '● ' + (state.lang==='ar' ? 'تأخير بسيط' : 'Minor delay') + ' · ' : ''}
+              ${state.lang==='ar' ? `كل ${r.freq}` : `Every ${r.freq}`}
+            </p>
+          </div>
+          <div class="text-right flex-shrink-0">
+            <p class="text-[9px] uppercase tracking-wider font-bold" style="color:var(--ink-faint)">${state.lang==='ar' ? 'التالي' : 'Next'}</p>
+            <p class="font-mono text-sm font-semibold" style="color:var(--ink)">${r.mins}:${String(r.secs).padStart(2,'0')}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <button onclick="closeModal(); go('plan')" class="tap w-full mt-4 py-3 rounded-2xl text-sm font-semibold" style="background:var(--ink); color:var(--bg-warm)">${state.lang==='ar' ? 'خطط رحلة بالأتوبيس' : 'Plan a bus trip'}</button>
+  `;
+}
+
+function modalEnrRail() {
+  const L = t[state.lang];
+  const title = state.lang === 'ar' ? 'السكك الحديدية المصرية' : 'Egyptian National Railways';
+  const subtitle = state.lang === 'ar' ? 'القطارات بين المحافظات من محطة رمسيس' : 'Intercity service from Ramses Station';
+  const dests = [
+    { en: 'Alexandria', ar: 'الإسكندرية',  dep: '14:30', arr: '17:15', mins: 165, cost: 95,  cls: 'VIP', live: '0:42' },
+    { en: 'Alexandria', ar: 'الإسكندرية',  dep: '16:00', arr: '18:45', mins: 165, cost: 75,  cls: 'AC',  live: '2:12' },
+    { en: 'Luxor',      ar: 'الأقصر',      dep: '22:00', arr: '07:00', mins: 540, cost: 175, cls: 'Sleeper', live: null },
+    { en: 'Aswan',      ar: 'أسوان',        dep: '20:30', arr: '08:30', mins: 720, cost: 220, cls: 'Sleeper', live: null },
+    { en: 'Port Said',  ar: 'بورسعيد',     dep: '15:15', arr: '18:45', mins: 210, cost: 65,  cls: 'AC',  live: '1:27' },
+    { en: 'Mansoura',   ar: 'المنصورة',    dep: '13:45', arr: '16:00', mins: 135, cost: 55,  cls: 'AC',  live: '0:00' },
+  ];
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h3 class="font-display text-xl font-medium" style="color:var(--ink)">${title}</h3>
+        <p class="text-xs mt-0.5" style="color:var(--ink-soft)">${subtitle}</p>
+      </div>
+      <button onclick="closeModal()" class="tap w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--bg-card); color:var(--ink-soft); border:1px solid var(--line)">${ic('x','w-4 h-4')}</button>
+    </div>
+    <div class="card-warm p-3 mb-3 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background:var(--line-6); color:white">${ic('train','w-5 h-5')}</div>
+      <div class="flex-1">
+        <p class="text-xs font-semibold uppercase tracking-wider" style="color:var(--ink-soft)">${state.lang==='ar' ? 'محطة الانطلاق' : 'Origin station'}</p>
+        <p class="text-sm font-semibold" style="color:var(--ink)">${state.lang==='ar' ? 'محطة رمسيس · القاهرة' : 'Ramses Station · Cairo'}</p>
+      </div>
+      <span class="text-[9px] font-mono font-bold px-2 py-1 rounded flex items-center gap-1" style="background:var(--green); color:white">
+        <span class="w-1 h-1 rounded-full blink" style="background:white"></span>
+        LIVE
+      </span>
+    </div>
+    <p class="text-[10px] uppercase tracking-widest font-semibold mb-2 ml-1" style="color:var(--ink-faint)">${state.lang==='ar' ? 'الرحلات القادمة اليوم' : 'Upcoming departures today'}</p>
+    <div class="space-y-1.5">
+      ${dests.map(d => {
+        const hr = Math.floor(d.mins/60), mn = d.mins%60;
+        const dur = state.lang==='ar' ? `${hr}س ${mn}د` : `${hr}h ${mn}m`;
+        return `
+          <div class="card p-3">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                  <p class="text-sm font-semibold" style="color:var(--ink)">${state.lang==='ar' ? d.ar : d.en}</p>
+                  <span class="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded" style="background:var(--line-6); color:white">${d.cls}</span>
+                </div>
+                <p class="text-[11px]" style="color:var(--ink-faint)">${d.dep} → ${d.arr} · ${dur}</p>
+              </div>
+              <div class="text-right flex-shrink-0">
+                <p class="font-display text-lg font-medium" style="color:var(--ink)">${d.cost}</p>
+                <p class="text-[9px] uppercase tracking-wider" style="color:var(--ink-faint)">${L.egp}</p>
+              </div>
+            </div>
+            ${d.live !== null ? `
+              <div class="flex items-center gap-1.5 pt-2" style="border-top:1px solid var(--line)">
+                <span class="w-1 h-1 rounded-full blink" style="background:var(--green)"></span>
+                <span class="text-[10px] font-mono" style="color:var(--ink-soft)">${state.lang==='ar' ? 'الانطلاق خلال' : 'Boarding in'}</span>
+                <span class="text-[11px] font-mono font-bold ml-auto" style="color:var(--ink)">${d.live} ${state.lang==='ar' ? 'س' : 'hr'}</span>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <button onclick="closeModal(); go('plan')" class="tap w-full mt-4 py-3 rounded-2xl text-sm font-semibold" style="background:var(--ink); color:var(--bg-warm)">${state.lang==='ar' ? 'احجز رحلة بالقطار' : 'Book an intercity trip'}</button>
+  `;
+}
+
+function modalTimePicker() {
+  const title = state.lang === 'ar' ? 'وقت المغادرة' : 'Departure time';
+  const opts = [
+    { id: 'now',  label: state.lang==='ar' ? 'الآن' : 'Now', mins: 0 },
+    { id: '+15',  label: state.lang==='ar' ? 'بعد 15 دقيقة' : 'In 15 minutes', mins: 15 },
+    { id: '+30',  label: state.lang==='ar' ? 'بعد 30 دقيقة' : 'In 30 minutes', mins: 30 },
+    { id: '+60',  label: state.lang==='ar' ? 'بعد ساعة' : 'In 1 hour', mins: 60 },
+    { id: '+120', label: state.lang==='ar' ? 'بعد ساعتين' : 'In 2 hours', mins: 120 },
+  ];
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-medium">${title}</h3>
+      <button onclick="closeModal()" class="tap w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--bg-card); color:var(--ink-soft); border:1px solid var(--line)">${ic('x','w-4 h-4')}</button>
+    </div>
+    <div class="space-y-2">
+      ${opts.map(o => {
+        const sel = state.departureTime === o.id;
+        const target = addMin(liveData.now, o.mins);
+        return `
+          <button onclick="pickTime('${o.id}')" class="tap w-full card p-3 flex items-center gap-3 text-left ${sel ? 'route-card selected' : ''}">
+            <div class="radio ${sel ? 'selected' : ''}"></div>
+            <div class="flex-1">
+              <p class="text-sm font-semibold" style="color:var(--ink)">${o.label}</p>
+              <p class="text-[11px] font-mono" style="color:var(--ink-faint)">${formatTime(target)}</p>
+            </div>
+          </button>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function modalLocationPicker() {
+  const title = state.locationField === 'from'
+    ? (state.lang === 'ar' ? 'نقطة الانطلاق' : 'From')
+    : (state.lang === 'ar' ? 'الوجهة' : 'To');
+  const stations = [
+    { en: 'Maadi', ar: 'المعادي', line: 1 },
+    { en: 'Sadat', ar: 'السادات', interchange: [1, 2] },
+    { en: 'Tahrir', ar: 'التحرير', interchange: [1, 2] }, // alias for Sadat in the routing engine
+    { en: 'Mohandessin', ar: 'المهندسين', line: 2 },
+    { en: 'Dokki', ar: 'الدقي', line: 2 },
+    { en: 'Helwan', ar: 'حلوان', line: 1 },
+    { en: 'El-Marg', ar: 'المرج', line: 1 },
+    { en: 'Adly Mansour', ar: 'عدلي منصور', line: 3 },
+    { en: 'Kit Kat', ar: 'كيت كات', line: 3 },
+    { en: 'Stadium', ar: 'استاد القاهرة', line: 3 }, // Line 4 monorail extension opens June 2026
+    { en: 'Nasser', ar: 'جمال عبد الناصر', interchange: [1, 3] },
+    { en: 'Attaba', ar: 'العتبة', interchange: [2, 3] },
+    { en: 'Abbassia', ar: 'العباسية', line: 3 },
+    // Cairo Monorail East — operational from May 6, 2026 (16 stations: Musheer Tantawi to Justice City)
+    { en: 'Musheer Tantawi', ar: 'المشير طنطاوي', line: 4 },
+    { en: 'Fifth Settlement', ar: 'التجمع الخامس', line: 4 }, // alias → Musheer Tantawi
+    { en: 'One Ninety', ar: 'وان ناينتي', line: 4 },
+    { en: 'Lotus', ar: 'اللوتس', line: 4 },
+    { en: 'Golden Square', ar: 'الميدان الذهبي', line: 4 },
+    { en: 'Al-Fattah Mosque', ar: 'مسجد الفتاح العليم', line: 4 },
+    { en: 'Business District', ar: 'الحي المالي', line: 4 },
+    { en: 'Government District', ar: 'الحي الحكومي', line: 4 },
+    { en: 'Justice City', ar: 'مدينة العدالة', line: 4 },
+    // Monorail West (under construction, projected late 2026)
+    { en: '6th October', ar: 'السادس من أكتوبر', line: 5 },
+    { en: 'Sheikh Zayed', ar: 'الشيخ زايد', line: 5 },
+    { en: 'Mall of Egypt', ar: 'مول مصر', line: 5 },
+    { en: 'Wadi El-Nile', ar: 'وادي النيل', line: 5 },
+    { en: 'Cairo Airport', ar: 'مطار القاهرة', special: true },
+    { en: 'GUC New Cairo', ar: 'الجامعة الألمانية', special: true },
+    // National Railways (ENR) intercity destinations
+    { en: 'Alexandria', ar: 'الإسكندرية', special: true, isTrain: true },
+    { en: 'Luxor', ar: 'الأقصر', special: true, isTrain: true },
+    { en: 'Aswan', ar: 'أسوان', special: true, isTrain: true },
+  ];
+  const raw = state.searchQuery || '';
+  const q = raw.toLowerCase().trim();
+  const filtered = !q ? stations : stations.filter(s =>
+    s.en.toLowerCase().includes(q) || s.ar.includes(raw)
+  );
+  const placeholder = state.lang==='ar' ? 'ابحث عن محطة أو مكان...' : 'Search for a station or place...';
+  return `
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-display text-xl font-medium">${title}</h3>
+      <button onclick="closeModal()" class="tap w-8 h-8 rounded-full flex items-center justify-center" style="background:var(--bg-card); color:var(--ink-soft); border:1px solid var(--line)">${ic('x','w-4 h-4')}</button>
+    </div>
+    <div class="card p-3 mb-3 flex items-center gap-2" style="background:var(--bg-card)">
+      <span style="color:var(--ink-faint)">${ic('search','w-4 h-4')}</span>
+      <input id="loc-search" type="text"
+             oninput="updateSearch(this.value)"
+             placeholder="${placeholder}"
+             value="${raw.replace(/"/g, '&quot;')}"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             class="flex-1 bg-transparent outline-none text-sm ${fontClass()}"
+             style="color:var(--ink); min-width:0"
+             dir="${langDir()}" />
+      ${raw ? `<button onclick="updateSearch('')" class="tap w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--line); color:var(--ink-soft)">${ic('x','w-3 h-3')}</button>` : ''}
+    </div>
+
+    <!-- Current location pinned at top (always visible, ignores search filter) -->
+    <button onclick="pickLocation('Fifth Settlement','التجمع الخامس')" class="tap w-full mb-3 p-3 rounded-2xl flex items-center gap-3 text-left relative overflow-hidden"
+            style="background:linear-gradient(135deg, var(--nile-soft) 0%, #FFFFFF 100%); border:1px solid var(--nile)">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 relative" style="background:var(--nile); color:white">
+        ${ic('target','w-5 h-5')}
+        <span class="absolute inline-block rounded-full pulse-dot" style="width:8px; height:8px; background:white; right:-1px; top:-1px; border:1.5px solid var(--nile)"></span>
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold leading-tight" style="color:var(--nile-deep)">${state.lang==='ar' ? 'موقعك الحالي' : 'Your current location'}</p>
+        <p class="text-[11px] mt-0.5" style="color:var(--ink-soft)">${state.lang==='ar' ? 'التجمع الخامس · تم تحديد الموقع' : 'Fifth Settlement · GPS detected'}</p>
+      </div>
+      <span class="text-[9px] font-mono font-bold px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0" style="background:var(--green); color:white">
+        <span class="w-1 h-1 rounded-full blink" style="background:white"></span>
+        LIVE
+      </span>
+    </button>
+
+    ${filtered.length === 0 ? `
+      <div class="card p-8 text-center">
+        <p class="text-sm font-medium mb-1" style="color:var(--ink)">${state.lang==='ar' ? 'لا توجد نتائج' : 'No stations match'}</p>
+        <p class="text-xs" style="color:var(--ink-faint)">${state.lang==='ar' ? 'جرب كلمة مفتاحية مختلفة' : 'Try a different keyword'}</p>
+      </div>
+    ` : `
+      <p class="text-[10px] uppercase tracking-widest font-semibold mb-2 ml-1" style="color:var(--ink-faint)">${state.lang==='ar' ? 'محطات وأماكن' : 'Stations & places'}</p>
+      <div class="space-y-1.5">
+        ${filtered.map(s => {
+          const subtitle = s.special
+            ? (state.lang==='ar' ? 'وجهة' : 'Destination')
+            : s.interchange
+              ? `${state.lang==='ar' ? 'الخطوط' : 'Lines'} ${s.interchange.join(' · ')}`
+              : `${state.lang==='ar' ? 'الخط' : 'Line'} ${s.line}`;
+          const dotBg = s.special ? 'var(--gold)' : s.interchange ? 'var(--ink)' : `var(--line-${s.line})`;
+          return `
+            <button onclick="pickLocation('${s.en}', '${s.ar.replace(/'/g, "\\'")}')" class="tap w-full card p-3 flex items-center gap-3 text-left">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background:${dotBg}; color:white">${ic(s.special ? 'pin' : 'metro', 'w-4 h-4')}</div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate" style="color:var(--ink)">${state.lang==='ar' ? s.ar : s.en}</p>
+                <p class="text-[10px]" style="color:var(--ink-faint)">${subtitle}</p>
+              </div>
+            </button>
+          `;
+        }).join('')}
+      </div>
+    `}
+  `;
+}
+
+function renderToast() {
+  if (!state.toast) return '';
+  return `<div class="toast ${fontClass()}" dir="${langDir()}">${state.toast.text}</div>`;
+}
+
+// ============== ROUTER ==============
+const screens = {
+  homescreen: renderHomescreen,
+  splash: renderSplash,
+  home: renderHome,
+  plan: renderPlan,
+  results: renderResults,
+  payment: renderPayment,
+  ticket: renderTicket,
+  profile: renderProfile,
+  network: renderNetwork,
+};
+
+function render() {
+  document.getElementById('screen-root').innerHTML = screens[state.screen]() + renderModal() + renderToast();
+}
+
+function go(s) {
+  // Remember the last in-app screen so re-launching from the icon resumes there
+  if (s !== 'homescreen' && s !== 'splash') {
+    state.lastAppScreen = s;
+  }
+  state.screen = s;
+  render();
+  document.getElementById('screen-root').scrollTop = 0;
+  // Splash auto-advances after a beat
+  if (s === 'splash') {
+    setTimeout(() => {
+      if (state.screen === 'splash') {
+        go(state.lastAppScreen || 'home');
+      }
+    }, 1500);
+  }
+}
+
+function launchMishwari() {
+  go('splash');
+}
+function selectRoute(i) { state.selectedRoute = i; render(); }
+function setPay(p) { state.paymentMethod = p; render(); }
+function setLang(l) { state.lang = l; render(); }
+function toggleLang() { state.lang = state.lang === 'en' ? 'ar' : 'en'; render(); }
+
+function setDestination(en, ar) {
+  state.trip.to = en;
+  state.trip.toAr = ar;
+  go('plan');
+}
+function selectRecentTrip(fromEn, fromAr, toEn, toAr) {
+  state.trip.from = fromEn;
+  state.trip.fromAr = fromAr;
+  state.trip.to = toEn;
+  state.trip.toAr = toAr;
+  go('results');
+}
+function tapStation(en, ar) {
+  state.trip.to = en;
+  state.trip.toAr = ar;
+  go('plan');
+}
+
+// Modal/sheet actions
+function openModal(name) {
+  state.modal = name;
+  render();
+}
+function closeModal() {
+  state.modal = null;
+  state.locationField = null;
+  state.searchQuery = '';
+  render();
+}
+function openLocationPicker(field) {
+  state.locationField = field;
+  state.searchQuery = '';
+  state.modal = 'locationpicker';
+  render();
+  // Auto-focus the search input
+  setTimeout(() => {
+    const input = document.getElementById('loc-search');
+    if (input) input.focus();
+  }, 50);
+}
+function updateSearch(v) {
+  state.searchQuery = v;
+  render();
+  // Restore focus + caret position so typing stays smooth
+  const input = document.getElementById('loc-search');
+  if (input) {
+    input.focus();
+    const len = input.value.length;
+    try { input.setSelectionRange(len, len); } catch (e) {}
+  }
+}
+function pickTime(id) {
+  state.departureTime = id;
+  closeModal();
+}
+function pickLocation(en, ar) {
+  if (state.locationField === 'from') {
+    state.trip.from = en;
+    state.trip.fromAr = ar;
+  } else {
+    state.trip.to = en;
+    state.trip.toAr = ar;
+  }
+  closeModal();
+}
+function swapTrip() {
+  const f = state.trip.from, fa = state.trip.fromAr;
+  state.trip.from = state.trip.to;
+  state.trip.fromAr = state.trip.toAr;
+  state.trip.to = f;
+  state.trip.toAr = fa;
+  render();
+}
+function setPreference(p) {
+  state.preference = p;
+  // Auto-select the matching route from currently-computed routes
+  if (state.routes && state.routes.length) {
+    state.selectedRoute = bestRouteIdFor(state.routes, p);
+  }
+  render();
+}
+
+// Toast notifications (auto-dismiss after 2.5s)
+function showToast(text) {
+  state.toast = { text };
+  render();
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    state.toast = null;
+    render();
+  }, 2500);
+}
+
+// Timer for the ticket screen — purely cosmetic
+let secondsLeft = 120 * 60;
+setInterval(() => {
+  secondsLeft = Math.max(0, secondsLeft - 1);
+  const el = document.getElementById('timer');
+  if (el) {
+    const m = Math.floor(secondsLeft / 60);
+    const s = secondsLeft % 60;
+    el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+}, 1000);
+
+// First render — robust init that survives slow Tailwind CDN and any silent JS errors
+function initApp() {
+  try {
+    render();
+  } catch (err) {
+    // Visible error reporting so we can see what failed on mobile
+    const root = document.getElementById('screen-root');
+    if (root) {
+      root.innerHTML = `
+        <div style="padding:24px; font-family:system-ui,sans-serif; color:#15202B">
+          <h2 style="font-size:18px; margin-bottom:8px">⚠️ Demo failed to load</h2>
+          <p style="font-size:13px; margin-bottom:12px">Error: <strong>${err.message}</strong></p>
+          <p style="font-size:12px; color:#666; margin-bottom:16px">Stack:</p>
+          <pre style="font-size:10px; background:#f5f5f5; padding:8px; border-radius:4px; overflow:auto; white-space:pre-wrap">${err.stack || 'no stack'}</pre>
+          <p style="font-size:11px; color:#999; margin-top:16px">If the screen is blank when opened from a local file on iOS, the Tailwind CDN may be blocked. Try opening this URL through a web link instead.</p>
+        </div>
+      `;
+    }
+    console.error('initApp failed:', err);
+  }
+}
+
+// Surface uncaught errors visibly during the demo
+window.addEventListener('error', (e) => {
+  const root = document.getElementById('screen-root');
+  if (root && !root.innerHTML.trim()) {
+    root.innerHTML = `<div style="padding:24px; font-family:system-ui; font-size:13px; color:#B23A2E"><strong>JS error:</strong><br>${e.message}<br><br>at ${e.filename}:${e.lineno}:${e.colno}</div>`;
+  }
+});
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
+</script>
+
+</body>
+</html>
